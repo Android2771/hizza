@@ -1,0 +1,2 @@
+# hizzacoin
+Hizzacoin backend

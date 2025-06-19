@@ -1,0 +1,7 @@
+﻿services:
+  hizzacoinbackend:
+    image: hizzacoinbackend
+    build:
+      context: .
+      dockerfile: HizzaCoinBackend/Dockerfile
+

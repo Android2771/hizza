@@ -1,7 +1,13 @@
+using HizzaCoinBackend.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
+builder.Services.Configure<HizzaCoinDatabaseSettings>(
+    builder.Configuration.GetSection("BookStoreDatabase"));
+
 builder.Services.AddOpenApi();
 
 var app = builder.Build();

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HizzaCoinBackend.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/transactions")]
 public class TransactionsController : ControllerBase
 {
     private readonly TransactionsService _transactionsService;

@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices.JavaScript;
+﻿using System.Text.Json.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -10,12 +10,20 @@ public class Account
     [BsonRepresentation(BsonType.ObjectId)]
     public string? Id { get; set; }
 
+    [BsonElement("DiscordId")]
+    [JsonPropertyName("DiscordId")]
     public string DiscordId { get; set; }
     
+    [BsonElement("Amount")]
+    [JsonPropertyName("Amount")]
     public int Amount { get; set; }
     
-    public JSType.Date Date { get; set; }
+    [BsonElement("Date")]
+    [JsonPropertyName("Date")]
+    public DateTime Date { get; set; }
     
+    [BsonElement("Streak")]
+    [JsonPropertyName("Streak")]
     public int Streak { get; set; }
     
 }

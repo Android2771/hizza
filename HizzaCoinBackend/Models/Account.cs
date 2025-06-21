@@ -18,9 +18,13 @@ public class Account
     [JsonPropertyName("Amount")]
     public int Amount { get; set; }
     
+    [BsonElement("ReservedAmount")]
+    [JsonPropertyName("ReservedAmount")]
+    public int ReservedAmount { get; set; }
+    
     [BsonElement("Date")]
-    [JsonPropertyName("Date")]
-    public DateTime Date { get; set; }
+    [JsonPropertyName("ClaimDate")]
+    public DateTime ClaimDate { get; set; }
     
     [BsonElement("Streak")]
     [JsonPropertyName("Streak")]

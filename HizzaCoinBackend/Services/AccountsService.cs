@@ -8,10 +8,8 @@ public class AccountsService
 {
     private readonly IMongoCollection<Account> _accountsCollection;
 
-    public AccountsService(IOptions<HizzaCoinDatabaseSettings> hizzaCoinDatabaseSettings)
+    public AccountsService(IMongoDatabase database)
     {
-        var client = new MongoClient(hizzaCoinDatabaseSettings.Value.ConnectionString);
-        var database = client.GetDatabase(hizzaCoinDatabaseSettings.Value.DatabaseName);
         _accountsCollection = database.GetCollection<Account>("Accounts");
     }
 
@@ -25,7 +23,7 @@ public class AccountsService
         await _accountsCollection.InsertOneAsync(account);
     
     public async Task UpdateAsync(string id, Account updatedAccount) =>
-        _accountsCollection.ReplaceOneAsync(account => account.Id == id, updatedAccount);
+        await _accountsCollection.ReplaceOneAsync(account => account.Id == id, updatedAccount);
     
     public async Task RemoveAsync(string id) =>
         await _accountsCollection.DeleteOneAsync(account => account.Id == id);

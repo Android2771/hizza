@@ -1,14 +1,25 @@
 
 using HizzaCoinBackend.Models;
 using HizzaCoinBackend.Services;
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.Configure<HizzaCoinDatabaseSettings>(
     builder.Configuration.GetSection("HizzaCoinDatabase"));
 
+//Created once and used for every http request (to instantiate client)
+builder.Services.AddSingleton<IMongoDatabase>(serviceProvider =>
+{
+    var settings = serviceProvider.GetRequiredService<IOptions<HizzaCoinDatabaseSettings>>().Value;
+    var client = new MongoClient(settings.ConnectionString);
+    return client.GetDatabase(settings.DatabaseName);
+});
+
 builder.Services.AddSingleton<AccountsService>();
+builder.Services.AddSingleton<ChallengesService>();
+builder.Services.AddSingleton<TransactionsService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(

@@ -15,6 +15,9 @@ public class ChallengesService
 
     public async Task<List<Challenge>> GetAsync() =>
         await _challengesCollection.Find(challenge => true).ToListAsync();
+
+    public async Task<List<Challenge>> GetAsyncByDiscordId(string discordId) =>
+        await _challengesCollection.Find(challenge => challenge.ChallengerDiscordId == discordId).ToListAsync();
     
     public async Task<Challenge?> GetAsync(string id) =>
         await _challengesCollection.Find(challenge => challenge.Id == id).FirstOrDefaultAsync();

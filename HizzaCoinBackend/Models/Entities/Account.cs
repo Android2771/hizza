@@ -6,6 +6,15 @@ namespace HizzaCoinBackend.Models;
 
 public class Account
 {
+    public Account(string discordId, int balance, int reservedBalance, DateTime lastClaimDate, int streak)
+    {
+        DiscordId = discordId;
+        Balance = balance;
+        ReservedBalance = reservedBalance;
+        LastClaimDate = lastClaimDate;
+        Streak = streak;
+    }
+
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
     public string? Id { get; set; }
@@ -14,17 +23,17 @@ public class Account
     [JsonPropertyName("DiscordId")]
     public string DiscordId { get; set; }
     
-    [BsonElement("Amount")]
-    [JsonPropertyName("Amount")]
-    public int Amount { get; set; }
+    [BsonElement("Balance")]
+    [JsonPropertyName("Balance")]
+    public int Balance { get; set; }
     
-    [BsonElement("ReservedAmount")]
-    [JsonPropertyName("ReservedAmount")]
-    public int ReservedAmount { get; set; }
+    [BsonElement("ReservedBalance")]
+    [JsonPropertyName("ReservedBalance")]
+    public int ReservedBalance { get; set; }
     
-    [BsonElement("Date")]
-    [JsonPropertyName("ClaimDate")]
-    public DateTime ClaimDate { get; set; }
+    [BsonElement("LastClaimDate")]
+    [JsonPropertyName("LastClaimDate")]
+    public DateTime LastClaimDate { get; set; }
     
     [BsonElement("Streak")]
     [JsonPropertyName("Streak")]

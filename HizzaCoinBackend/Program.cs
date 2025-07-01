@@ -20,7 +20,6 @@ builder.Services.AddSingleton<IMongoDatabase>(serviceProvider =>
 builder.Services.AddSingleton<AccountsService>();
 builder.Services.AddSingleton<ChallengesService>();
 builder.Services.AddSingleton<TransactionsService>();
-builder.Services.AddSingleton<DestiniesService>();
 builder.Services.AddSingleton<RewardsService>();
 builder.Services.AddSingleton<CoinCommandsService>();
 

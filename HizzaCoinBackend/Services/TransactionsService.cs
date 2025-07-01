@@ -7,6 +7,8 @@ namespace HizzaCoinBackend.Services;
 public class TransactionsService
 {
     private readonly IMongoCollection<Transaction> _transactionsCollection;
+    
+    
 
     public TransactionsService(IMongoDatabase database)
     {

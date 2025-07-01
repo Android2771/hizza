@@ -6,6 +6,21 @@ namespace HizzaCoinBackend.Models;
 
 public class Challenge
 {
+    public Challenge()
+    {
+    }
+
+    public Challenge(string challengerDiscordId, string challengedDiscordId, int wager, DateTime date, Hand challengerHand, Hand challengedHand, ChallengeState state)
+    {
+        ChallengerDiscordId = challengerDiscordId;
+        ChallengedDiscordId = challengedDiscordId;
+        Wager = wager;
+        Date = date;
+        ChallengerHand = challengerHand;
+        ChallengedHand = challengedHand;
+        State = state;
+    }
+
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
     public string? Id { get; set; }
@@ -18,9 +33,9 @@ public class Challenge
     [JsonPropertyName("ChallengedDiscordId")]
     public string ChallengedDiscordId { get; set; }
     
-    [BsonElement("BetAmount")]
-    [JsonPropertyName("BetAmount")]
-    public int BetAmount { get; set; }
+    [BsonElement("Wager")]
+    [JsonPropertyName("Wager")]
+    public int Wager { get; set; }
     
     [BsonElement("Date")]
     [JsonPropertyName("Date")]
@@ -34,7 +49,7 @@ public class Challenge
     [JsonPropertyName("ChallengedHand")]
     public Hand ChallengedHand { get; set; }
     
-    [BsonElement("InProgress")]
-    [JsonPropertyName("InProgress")]
-    public int InProgress { get; set; }
+    [BsonElement("State")]
+    [JsonPropertyName("State")]
+    public ChallengeState State { get; set; }
 }

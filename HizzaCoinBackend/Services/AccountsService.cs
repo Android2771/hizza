@@ -18,6 +18,15 @@ public class AccountsService
     
     public async Task<Account?> GetAsync(string id) =>
         await _accountsCollection.Find(account => account.Id == id).FirstOrDefaultAsync();
+
+    public async Task<Account?> GetAsyncByDiscordId(string discordId) =>
+        await _accountsCollection.Find(account => account.DiscordId == discordId).FirstOrDefaultAsync();
+
+    public async Task<List<Account>> GetAsyncTopFiveBalances()
+    {
+        var sort = Builders<Account>.Sort.Descending(o => o.Balance);
+        return await _accountsCollection.Find(account => true).Sort(sort).Limit(5).ToListAsync();
+    }
     
     public async Task CreateAsync(Account account) =>
         await _accountsCollection.InsertOneAsync(account);

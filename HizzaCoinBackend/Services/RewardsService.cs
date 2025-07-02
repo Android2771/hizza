@@ -18,7 +18,14 @@ public class RewardsService
     
     public async Task<Reward?> GetAsync(string id) =>
         await _rewardsCollection.Find(reward => reward.Id == id).FirstOrDefaultAsync();
-    
+
+    public async Task<Reward?> GetAsyncNextReward(int streak)
+    {
+        var filter = Builders<Reward>.Filter.Gte(o => o.Streak, streak);
+        var sort = Builders<Reward>.Sort.Ascending(o => o.Streak);
+        return await _rewardsCollection.Find(filter).Sort(sort).Limit(1).FirstOrDefaultAsync();
+    }
+
     public async Task CreateAsync(Reward reward) =>
         await _rewardsCollection.InsertOneAsync(reward);
     

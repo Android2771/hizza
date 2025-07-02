@@ -10,9 +10,9 @@ public class Reward
     [BsonRepresentation(BsonType.ObjectId)]
     public string? Id { get; set; }
 
-    [BsonElement("RequiredStreak")]
-    [JsonPropertyName("RequiredStreak")]
-    public int RequiredStreak { get; set; }
+    [BsonElement("Streak")]
+    [JsonPropertyName("Streak")]
+    public int Streak { get; set; }
     
     [BsonElement("RewardedAmount")]
     [JsonPropertyName("RewardedAmount")]

@@ -1,7 +1,23 @@
-﻿services:
-  hizzacoinbackend:
-    image: hizzacoinbackend
+services:
+  hizzacoin-backend:
     build:
       context: .
       dockerfile: HizzaCoinBackend/Dockerfile
-
+      no_cache: true
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    depends_on:
+      - hizzacoin-database
+    restart: unless-stopped
+    network_mode: host
+    
+  hizzacoin-database:
+    image: mongodb/mongodb-community-server:latest
+    container_name: hizzacoin-database
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo-data:/data/db
+    restart: unless-stopped
+    network_mode: host

@@ -1,44 +1,49 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using HizzaCoinBackend.Models;
+using HizzaCoinBackend.Models.DTOs;
+using HizzaCoinBackend.Services;
+using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 
 namespace HizzaCoinBackend.Controllers;
 
 [ApiController]
-[Route("api/coincommands")]
+[Route("api/coin-commands")]
 public class CoinCommandsController
 {
-    [HttpGet("coinclaim")]
-    public async Task<ActionResult<int>> CoinClaim(string id)
+    private readonly CoinCommandsService _coinCommandsService;
+
+    public CoinCommandsController(CoinCommandsService coinCommandsService)
     {
-        return 5;
+        _coinCommandsService = coinCommandsService;
     }
+
+    [HttpGet("coin-claim")]
+    public async Task<ActionResult<CoinClaimResponse?>> CoinClaim(string discordId) =>
+        await _coinCommandsService.CoinClaim(discordId);
     
-    [HttpGet("coinbalance")]
-    public async Task<ActionResult<int>> CoinBalance(string id)
-    {
-        return 5;
-    }
+    [HttpGet("coin-balance")]
+    public async Task<ActionResult<CoinBalanceResponse?>> CoinBalance(string discordId) =>
+        await _coinCommandsService.CoinBalance(discordId);
     
-    [HttpGet("coinleaderboard")]
-    public async Task<ActionResult<int>> CoinLeaderboard(string id)
-    {
-        return 5;
-    }
     
-    [HttpGet("coingive")]
-    public async Task<ActionResult<int>> CoinGive(string id)
-    {
-        return 5;
-    }
-    
+    [HttpGet("coin-leaderboard")]
+    public async Task<ActionResult<List<Account>>> CoinLeaderboard() =>
+        await _coinCommandsService.CoinLeaderboard();
+
+    [HttpGet("coin-economy")]
+    public async Task<ActionResult<CoinEconomyResponse?>> CoinEconomy(string discordId) =>
+        await _coinCommandsService.CoinEconomy(discordId);
+
+    [HttpGet("coin-give")]
+    public async Task<ActionResult<CoinBalanceResponse?>> CoinGive(string senderDiscordId, string receiverDiscordId, int amountToSend) =>
+        await _coinCommandsService.CoinGive(senderDiscordId, receiverDiscordId, amountToSend);
+
     [HttpGet("initiate-challenge")]
-    public async Task<ActionResult<int>> InitiateChallenge(string id)
-    {
-        return 5;
-    }
+    public async Task<ActionResult<Challenge?>> InitiateChallenge(string challengerDiscordId, string challengedDiscordId, int wager) =>
+        await _coinCommandsService.InitiateChallenge(challengerDiscordId, challengedDiscordId, wager);
     
     [HttpGet("respond-challenge")]
-    public async Task<ActionResult<int>> RespondChallenge(string id)
-    {
-        return 5;
-    }
+    public async Task<ActionResult<Challenge?>> RespondChallenge(string discordId, string challengeId, Hand hand) =>
+        await _coinCommandsService.RespondChallenge(discordId, challengeId, hand);
+    
 }

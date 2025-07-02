@@ -100,6 +100,28 @@ public class CoinCommandsService
     {
         return await _accountsService.GetAsyncTopFiveBalances();
     }
+
+    public async Task<CoinEconomyResponse?> CoinEconomy(string discordId)
+    {
+        var requesterAccount = await _accountsService.GetAsyncByDiscordId(discordId);
+        if (requesterAccount != null)
+        {
+            var accounts = await _accountsService.GetAsync();
+            var totalHizzaCoinAmount = accounts.Sum(o => o.Balance);
+            var totalHizzaCoinAccounts = accounts.Count;
+            var leaderboardPlace = accounts
+                .Where(o => o.DiscordId == discordId
+                            && o.Balance >= requesterAccount.Balance)
+                .ToList()
+                .Count;
+            double economyPercentage = (double)requesterAccount.Balance / totalHizzaCoinAmount;
+            economyPercentage = Math.Round(economyPercentage, 2, MidpointRounding.AwayFromZero);
+            
+            return new CoinEconomyResponse(totalHizzaCoinAmount, totalHizzaCoinAccounts, leaderboardPlace, economyPercentage);
+        }
+
+        return null;
+    }
     
     public async Task<CoinBalanceResponse?> CoinGive(string senderDiscordId, string receiverDiscordId, int amountToSend)
     {
@@ -147,6 +169,11 @@ public class CoinCommandsService
             ChallengeState.Draw);
 
         await _challengesService.CreateAsync(challenge);
+        
+        Task.Factory.StartNew(()=>
+        {
+            Task.Delay(1800000).ContinueWith(t => HandleOldChallenge(challenge.Id));
+        });
 
         return challenge;
     }
@@ -154,7 +181,7 @@ public class CoinCommandsService
     public async Task<Challenge?> RespondChallenge(string discordId, string wagerId, Hand hand)
     {
         var challenge = await _challengesService.GetAsync(wagerId);
-        if (challenge == null)
+        if (challenge == null || challenge.State != ChallengeState.InProgress)
             return null;
         
         if (challenge.State == ChallengeState.InProgress)
@@ -203,6 +230,22 @@ public class CoinCommandsService
         
         await _challengesService.UpdateAsync(wagerId, challenge);
         return challenge;
+    }
+
+    private async Task<bool> HandleOldChallenge(string challengeId)
+    {
+        var challenge = await _challengesService.GetAsync(challengeId);
+        if (challenge != null)
+        {
+            if (challenge.State == ChallengeState.InProgress)
+            {
+                challenge.State = ChallengeState.Expired;
+                await _challengesService.UpdateAsync(challenge.Id, challenge);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private int GetBaseClaim()

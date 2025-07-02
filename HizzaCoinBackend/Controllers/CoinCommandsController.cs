@@ -30,6 +30,10 @@ public class CoinCommandsController
     public async Task<ActionResult<List<Account>>> CoinLeaderboard() =>
         await _coinCommandsService.CoinLeaderboard();
 
+    [HttpGet("coin-economy")]
+    public async Task<ActionResult<CoinEconomyResponse?>> CoinEconomy(string discordId) =>
+        await _coinCommandsService.CoinEconomy(discordId);
+
     [HttpGet("coin-give")]
     public async Task<ActionResult<CoinBalanceResponse?>> CoinGive(string senderDiscordId, string receiverDiscordId, int amountToSend) =>
         await _coinCommandsService.CoinGive(senderDiscordId, receiverDiscordId, amountToSend);

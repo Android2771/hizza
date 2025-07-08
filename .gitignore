@@ -54,3 +54,20 @@ TestResult.xml
 nunit-*.xml
 .idea/
 mongo*
+
+# Frontend
+node_modules/
+resources/dms/
+resources/token.txt
+cmd.bat
+in.jpg
+out.png
+__pycache__/
+*.log
+practise.js
+*.tar.gz
+*.png
+*.js
+invocation.json
+yarn.lock
+.env

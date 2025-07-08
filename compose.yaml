@@ -1,9 +1,25 @@
 services:
+  hizzacoin-frontend:
+    container_name: hizzasama-frontend
+    build:
+      context: hizzasama
+      dockerfile: Dockerfile
+      no_cache: true
+    image: hizzasama-frontend
+    volumes:
+      - ./resources:/hizzasama/resources
+      - ./screen/resources:/screen/resources
+    restart: unless-stopped
+    network_mode: host
+    depends_on:
+      - hizzacoin-backend
   hizzacoin-backend:
+    container_name: hizzacoin-backend
     build:
       context: .
       dockerfile: HizzaCoinBackend/Dockerfile
       no_cache: true
+    image: hizzacoin-backend
     ports:
       - "8080:8080"
       - "8081:8081"

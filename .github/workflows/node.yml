@@ -5,9 +5,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   ci:
@@ -24,9 +24,8 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm install -g yarn typescript  
-    - name: npm install, build and test 
-      run: | 
-        npm i
-    # - run: npx tsc ./src/hizzasama.ts
-    - run: npm ci   
+    - name: npm clean install
+      run: npm ci
+
+    - name: Run TypeScript compiler
+      run: npx tsc

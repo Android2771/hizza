@@ -1,2 +1,2 @@
-# hizzacoin
-Hizzacoin backend
+# Hizza
+Discord Bot Work in Progress

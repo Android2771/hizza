@@ -504,7 +504,7 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
         responseText += `\`x${response.Multiplier}\` MULTIPLIER! 🪙🪙🪙\n\n`;
 
       responseText += `TOTAL COIN CLAIMED: \`${response.TotalClaim}\` 🪙\n`
-      responseText += `Next Reward at \`${response.NextReward.Streak}\` Streak`
+      responseText += `Next Reward is at Streak Day \`${response.NextReward.Streak}\``
     }
 
     await interaction.reply(responseText);
@@ -598,7 +598,7 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
     if(wager){
       //Ensure wager is valid
       if(wager != null && true){
-        await interaction.reply(`Wagers are disabled until HIZZACOIN 3.0 fully comes out`);
+        await interaction.reply(`Wagers are disabled until HIZZACOIN 3.0 fully comes out some time in the next few weeks!`);
         return;
       }
 

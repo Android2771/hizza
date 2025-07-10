@@ -31,22 +31,28 @@ public class CoinCommandsService
         }
         
         //Check whether last claim was today
-        if (account == null || account.LastClaimDate == DateTime.UtcNow.Date)
-        {
-            return null;
-        }
+        // if (account == null || account.LastClaimDate == DateTime.UtcNow.Date)
+        // {
+        //     return new CoinClaimResponse(
+        //         discordId,
+        //         0,
+        //         account.Streak,
+        //         0,
+        //         new Reward(),
+        //         new Reward(),
+        //         0,
+        //         false
+        //     );
+        // }
+        
+        //TODO: Uncomment above as it is for testing
         
         //Calculate total base claim with streak
-        var todaysClaim = GetBaseClaim();
-        account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) ? account.Streak + 1 : 0;
-        
-        //Add Multiplier
-        Random random = new Random();
-        var addMultiplier = random.Next(0, 100) < 15;
-        var multiplier = addMultiplier ? GetMultiplier() : 1;
-        todaysClaim = (int)(todaysClaim * multiplier + Math.Min(10, account.Streak));
-        account.LastClaimDate = DateTime.UtcNow.Date;
-        account.Balance += todaysClaim;
+        var baseClaim = GetBaseClaim();
+        // account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) ? account.Streak + 1 : 0;
+        account.Streak++;   //TODO: Change back to above as it is for testing
+
+        var totalClaim = baseClaim;
         
         //Add reward
         var nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
@@ -55,14 +61,23 @@ public class CoinCommandsService
         {
             claimedReward = nextReward;
             nextReward = await _rewardsService.GetAsyncNextReward(account.Streak + 1);
-            todaysClaim += nextReward.RewardedAmount;
+            totalClaim += nextReward.RewardedAmount;
         }
+        
+        //Add Multiplier
+        Random random = new Random();
+        var addMultiplier = random.Next(0, 100) < 15;
+        var multiplier = addMultiplier ? GetMultiplier() : 1;
+        totalClaim = (int)(totalClaim * multiplier + Math.Min(10, account.Streak));
+        
+        account.LastClaimDate = DateTime.UtcNow.Date;
+        account.Balance += totalClaim;
 
         //Add to account and create transaction
         Transaction transaction = new Transaction(
             "1076237275513487361",
             discordId,
-            todaysClaim,
+            baseClaim,
             DateTime.Now,
             TransactionType.Claim
         );
@@ -75,17 +90,16 @@ public class CoinCommandsService
         await _transactionsService.CreateAsync(transaction);
         
         //Return response to bot
-        CoinClaimResponse coinClaimResponse = new CoinClaimResponse(
-                discordId,
-    todaysClaim,
-                account.Streak,
-                multiplier,
-                claimedReward,
-                nextReward ?? new Reward(),
-                true
-            );
-        
-        return coinClaimResponse;
+        return new CoinClaimResponse(
+            discordId,
+            baseClaim,
+            account.Streak,
+            multiplier,
+            claimedReward,
+            nextReward ?? new Reward(),
+            totalClaim,
+            true
+        );;
     }
     
     public async Task<CoinBalanceResponse?> CoinBalance(string discordId)
@@ -110,11 +124,10 @@ public class CoinCommandsService
             var totalHizzaCoinAmount = accounts.Sum(o => o.Balance);
             var totalHizzaCoinAccounts = accounts.Count;
             var leaderboardPlace = accounts
-                .Where(o => o.DiscordId == discordId
-                            && o.Balance >= requesterAccount.Balance)
+                .Where(o => o.Balance > requesterAccount.Balance)
                 .ToList()
                 .Count;
-            double economyPercentage = (double)requesterAccount.Balance / totalHizzaCoinAmount;
+            double economyPercentage = ((double)requesterAccount.Balance / totalHizzaCoinAmount) * 100;
             economyPercentage = Math.Round(economyPercentage, 2, MidpointRounding.AwayFromZero);
             
             return new CoinEconomyResponse(totalHizzaCoinAmount, totalHizzaCoinAccounts, leaderboardPlace, economyPercentage);

@@ -16,6 +16,44 @@ import 'dotenv/config';
 import OpenAI from "openai";
 import puppeteer  from 'puppeteer';
 
+interface Account {
+  Id: string | null;
+  DiscordId: string;
+  Balance: number;
+  ReservedBalance: number;
+  LastClaimDate: string;
+  Streak: number;
+}
+
+interface Reward {
+  Id: string | null;
+  Streak: number;
+  RewardedAmount: number;
+}
+
+interface CoinClaimResponse {
+  DiscordId: string;
+  BaseClaim: number;
+  Streak: number;
+  Multiplier: number;
+  ClaimedReward: Reward;
+  NextReward: Reward;
+  TotalClaim: number;
+  Claimed: boolean;
+}
+
+interface CoinBalanceResponse {
+  Balance: number;
+  WageredBalance: number;
+}
+
+interface CoinEconomyResponse {
+  TotalHizzaCoinAmount: number;
+  TotalHizzaCoinAccounts: number;
+  LeaderboardPlace: number;
+  PercentageEconomy: number;
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const token = process.env["DISCORD_BOT_TOKEN"];
@@ -24,7 +62,6 @@ const openai = new OpenAI({
 });
 const botId = atob(token!.split('.')[0]);
 const usernameCache: { [key: string]: string } = {}
-const BankDir = `${__dirname}/../resources/coinBank.csv`;
 
 const client = new Client(
   {
@@ -452,56 +489,75 @@ client.on('interactionCreate', async (interaction: Interaction) => {
 
 export async function coinClaim(interaction: ChatInputCommandInteraction) {
   if(interaction){  
-    const response = await fetch(`http://localhost:8080/api/coin-commands/coin-claim?discordId=${interaction.user.id}`);
-    await interaction.reply(`\`\`\`json\n${await response.text()}\`\`\``);
-  //     await interaction.reply(`🪙🪙🪙 <@${interaction.user.id}> CLAIMED \`${todaysClaim}\` COIN! (\`x${multiplier}\` MULTIPLIER, ${streakString}) 🪙🪙🪙`)
-  //     await interaction.reply(`🪙 <@${interaction.user.id}> claimed \`${todaysClaim}\` coin! (${streakString}) 🪙`)
-  //     await interaction.reply(`🪙 <@${interaction.user.id}> claimed \`${todaysClaim}\` coin! 🪙`)
-  //     await interaction.reply("You already claimed your coin!")
+    const response : CoinClaimResponse = await (await fetch(`http://localhost:8080/api/coin-commands/coin-claim?discordId=${interaction.user.id}`)).json();
+    
+    let responseText = `<@${interaction.user.id}> CLAIMED \`${response["BaseClaim"]}\` COIN!\n`
+
+    if(response.BaseClaim === 0)
+      responseText = "You have already claimed your coin!";
+    else{
+      if(response.Streak > 0)
+        responseText += `\`+${response.Streak}\` Streak\n`;
+      if(response.ClaimedReward.RewardedAmount > 0)
+        responseText += `\`+${response.ClaimedReward.RewardedAmount}\` Reward for \`${response.ClaimedReward.Streak}\` Streak\n`;
+      if(response.Multiplier > 1)
+        responseText += `\`x${response.Multiplier}\` MULTIPLIER! 🪙🪙🪙\n\n`;
+
+      responseText += `TOTAL COIN CLAIMED: \`${response.TotalClaim}\` 🪙\n`
+      responseText += `Next Reward at \`${response.NextReward.Streak}\` Streak`
     }
+
+    await interaction.reply(responseText);
+  }
 }
 
 export async function coinBalance(interaction: ChatInputCommandInteraction) {
   if(interaction){
-    const response = await fetch(`http://localhost:8080/api/coin-commands/coin-balance?discordId=${interaction.options!.get('person') ? interaction.options!.get('person')!.user!.id! : interaction.user.id}`);
-    await interaction.reply(`\`\`\`json\n${await response.text()}\`\`\``);
-  //     await interaction.reply(`${interaction.options!.get('person') ? '<@'+interaction.options!.get('person')!.user!.id! + '> has' : 'You have'} \`${hizzaAccount.amount}\` HizzaCoin 🪙`);
+    const response : CoinBalanceResponse = await (await fetch(`http://localhost:8080/api/coin-commands/coin-balance?discordId=${interaction.options!.get('person') ? interaction.options!.get('person')!.user!.id! : interaction.user.id}`)).json();
+    let responseText = "";
+    if(interaction.options!.get('person'))
+      responseText += `<@${interaction.options!.get('person')!.user!.id!}> has \`${response.Balance}\` HizzaCoin 🪙`;
+    else
+      responseText += `You have \`${response.Balance}\` HizzaCoin 🪙`;
 
-  //     await interaction.reply("You have 0 HizzaCoin. Use 'coin claim' to get some 🪙💸")
-  // }else{
-  //   return;
+    if(response.WageredBalance > 0)
+      responseText += ` (\`${response.WageredBalance}\` of which has been wagered)`
+    responseText = `${interaction.options!.get('person') ? '<@'+interaction.options!.get('person')!.user!.id! + '> has' : 'You have'} \`${response.Balance}\` HizzaCoin 🪙`;
+
+    await interaction.reply(responseText);
   }
 }
 
 export async function coinLeaderboard(interaction: ChatInputCommandInteraction) {
   if(interaction){  
-    const response = await fetch(`http://localhost:8080/api/coin-commands/coin-leaderboard`);
-    await interaction.reply(`\`\`\`json\n${await response.text()}\`\`\``);
-  //     await interaction.deferReply();
-  //     let username = await fetchUsername(hizzaAccounts[accountNo].userID);
-  //     learderBoardTxt = learderBoardTxt + (accountNo + 1 + ") " + "**" + username.padEnd(15, " ") + "**" + " with " + "**" + hizzaAccounts[accountNo].amount.padStart(5, " ") + "**" + " HizzaCoin\n");
-  //   }
-  //   await interaction.editReply(learderBoardTxt);
-  // }else{
-  //   return;
+    const response : Account[] = await (await fetch(`http://localhost:8080/api/coin-commands/coin-leaderboard`)).json();
+    console.log(response);
+    await interaction.deferReply();
+    
+    let leaderboardText = "**...................  LeaderBoard  ....................**\n";
+    for(let i = 0; i < response.length; i++){
+      let username = await fetchUsername(response[i].DiscordId);
+      leaderboardText += `${i+1}) **${username.padEnd(15, " ")}** with **${response[i].Balance.toString().padStart(5, " ")}** HizzaCoin\n`;
+    };
+    
+    await interaction.editReply(leaderboardText);
   }
 }
 
 export async function coinEconomy(interaction: ChatInputCommandInteraction) {
   if(interaction){  
-    const response = await fetch(`http://localhost:8080/api/coin-commands/coin-economy?discordId=${interaction.user.id}`);
-    await interaction.reply(`\`\`\`json\n${await response.text()}\`\`\``);
-  //   textToReturn = textToReturn + "🍕 HizzaCoin in Circulation: `" + totalCoin + "`\n"
-  //   textToReturn = textToReturn + "🔢 Total HizzaCoin Accounts: `" + totalAccounts + "`\n"
-  //   if (newUser === false) {
-  //     textToReturn = textToReturn + "📊 Your place on the LeaderBoard: `" + currentUserOnLeaderboard + "`\n"
-  //     textToReturn = textToReturn + "🥧 You own: `" + parseFloat(((currentUserBal / totalCoin) * 100).toString()).toFixed(2) + "%` of the economy\n"
-  //   }
-  //   else
-  //     textToReturn = textToReturn + "\nUse 'coin claim' to get some HizzaCoin and unlock more info"
-  //   await interaction.reply(">>> " + textToReturn + "")
-  // }else{
-  //   return;
+    const response : CoinEconomyResponse = await(await fetch(`http://localhost:8080/api/coin-commands/coin-economy?discordId=${interaction.user.id}`)).json();
+    let responseText = ""; 
+    if(response === null){
+      responseText = "Use 'coin claim' to get some HizzaCoin and unlock more info"
+    }else{
+      responseText += `🍕 HizzaCoin in Circulation: \`${response.TotalHizzaCoinAmount}\`\n`
+      responseText += `🔢 Total HizzaCoin Accounts: \`${response.TotalHizzaCoinAccounts}\`\n`
+      responseText += `📊 Your place on the LeaderBoard: \`${response.LeaderboardPlace}\`\n`
+      responseText += `🥧 You own: \`${response.PercentageEconomy}\`% of the economy\n`
+    }
+
+    await interaction.reply(responseText)
   }
 }
 

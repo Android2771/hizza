@@ -574,17 +574,6 @@ export async function coinGive(interaction: ChatInputCommandInteraction | undefi
                                 &receiverDiscordId=${interaction.options!.get('payee')!.user!.id}
                                 &amountToSend=${parseInt((interaction.options!.get('amount')!.value)!.toString())}`);
     await interaction.reply(`\`\`\`json\n${await response.text()}\`\`\``);
-  //     if (await addHizzaCoin(fromUser, -amount, true)) {
-  //       sendMessage(interaction.user.id, "Thanks for the HizzaCoin! 🥰🍕")
-  //     } else {
-  //       return;
-  //     }
-  //   }
-    
-  //   await interaction.reply(`Sent ${amount} HizzaCoin to <@${interaction.options!.get('payee')!.user!.id}>!`)
-
-  // }else{
-  //   return;
   }
 }
 export async function challenge(interaction: ChatInputCommandInteraction) {
@@ -608,12 +597,8 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
 
     if(wager){
       //Ensure wager is valid
-      if((wager < 0 || isNaN(wager) || wager % 1 !== 0)){
-        await interaction.reply({
-          content: `This wager is invalid! Make sure you're not doing something dicey`,
-          ephemeral: true
-        });
-
+      if(wager != null && true){
+        await interaction.reply(`Wagers are disabled until HIZZACOIN 3.0 fully comes out`);
         return;
       }
 

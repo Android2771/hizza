@@ -31,28 +31,25 @@ public class CoinCommandsService
         }
         
         //Check whether last claim was today
-        // if (account == null || account.LastClaimDate == DateTime.UtcNow.Date)
-        // {
-        //     return new CoinClaimResponse(
-        //         discordId,
-        //         0,
-        //         account.Streak,
-        //         0,
-        //         new Reward(),
-        //         new Reward(),
-        //         0,
-        //         false
-        //     );
-        // }
-        
-        //TODO: Uncomment above as it is for testing
+        if (account == null || account.LastClaimDate == DateTime.UtcNow.Date)
+        {
+            return new CoinClaimResponse(
+                discordId,
+                0,
+                account.Streak,
+                0,
+                new Reward(),
+                new Reward(),
+                0,
+                false
+            );
+        }
         
         //Calculate total base claim with streak
         var baseClaim = GetBaseClaim();
-        // account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) ? account.Streak + 1 : 0;
-        account.Streak++;   //TODO: Change back to above as it is for testing
+        account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) ? account.Streak + 1 : 0;
 
-        var totalClaim = baseClaim;
+        var totalClaim = baseClaim + account.Streak;
         
         //Add reward
         var nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
@@ -68,7 +65,7 @@ public class CoinCommandsService
         Random random = new Random();
         var addMultiplier = random.Next(0, 100) < 15;
         var multiplier = addMultiplier ? GetMultiplier() : 1;
-        totalClaim = (int)(totalClaim * multiplier + Math.Min(10, account.Streak));
+        totalClaim = (int)(totalClaim * multiplier);
         
         account.LastClaimDate = DateTime.UtcNow.Date;
         account.Balance += totalClaim;

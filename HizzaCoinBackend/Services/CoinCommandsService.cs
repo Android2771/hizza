@@ -63,7 +63,7 @@ public class CoinCommandsService
         
         //Add Multiplier
         Random random = new Random();
-        var addMultiplier = random.Next(0, 100) < 15;
+        var addMultiplier = random.Next(0, 100) < 13;
         var multiplier = addMultiplier ? GetMultiplier() : 1;
         totalClaim = (int)(totalClaim * multiplier);
         
@@ -72,7 +72,7 @@ public class CoinCommandsService
 
         //Add to account and create transaction
         Transaction transaction = new Transaction(
-            "1076237275513487361",
+            "0",
             discordId,
             baseClaim,
             DateTime.Now,

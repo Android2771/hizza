@@ -505,7 +505,7 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
 
       responseText += `TOTAL COIN CLAIMED: \`${response.TotalClaim}\` 🪙\n`
       if(response.NextReward)
-        responseText += `Next Reward is in \`${response.NextReward.Streak - response.ClaimedReward.Streak}\` days`
+        responseText += `Next Reward is in \`${response.NextReward.Streak - response.Streak}\` days`
     }
 
     await interaction.reply(responseText);

@@ -497,7 +497,7 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
       responseText = "You have already claimed your coin!";
     else{
       if(response.Streak > 0)
-        responseText += `\`+${Math.min(response.Streak, 10)}\` Streak\n`;
+        responseText += `\`+${Math.min(response.Streak, 10)}\` Streak ${response.Streak >= 10 ? 'MAX' : ''}\n`;
       if(response.ClaimedReward.RewardedAmount > 0)
         responseText += `\`+${response.ClaimedReward.RewardedAmount}\` Reward for \`${response.ClaimedReward.Streak}\` Streak\n`;
       if(response.Multiplier > 1)
@@ -505,7 +505,7 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
 
       responseText += `TOTAL COIN CLAIMED: \`${response.TotalClaim}\` 🪙\n`
       if(response.NextReward)
-        responseText += `Next Reward is in \`${response.NextReward.Streak - response.Streak}\` days`
+        responseText += `Next Reward is in \`${response.NextReward.Streak - response.Streak}\` days! (Streak Progress: \`${response.Streak}\`/${response.NextReward.Streak})\n`;
     }
 
     await interaction.reply(responseText);

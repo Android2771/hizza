@@ -13,5 +13,5 @@ RUN npm install
 RUN npm install typescript -g
 RUN tsc
 
-#CMD ["node", "/hizzasama/src/hizzasama.js", "--refresh-commands"]
-CMD ["node", "/hizzasama/src/hizzasama.js"]
+CMD ["node", "/hizzasama/src/hizzasama.js", "--refresh-commands"]
+#CMD ["node", "/hizzasama/src/hizzasama.js"]

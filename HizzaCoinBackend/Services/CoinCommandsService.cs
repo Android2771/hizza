@@ -303,10 +303,10 @@ public class CoinCommandsService
             if (numberBet == rouletteNumber)
             {
                 if(await PayOutSpoils(discordId, balance * 35))
-                    return new RouletteResponse(rouletteNumber, balance * 35);
+                    return new RouletteResponse(rouletteNumber, balance, balance * 35);
             }
 
-            return new RouletteResponse(rouletteNumber, 0);
+            return new RouletteResponse(rouletteNumber, 0, 0);
         }
 
         return null;
@@ -330,10 +330,10 @@ public class CoinCommandsService
                 (twelveBet == 3 && rouletteNumber >= 25))
             {
                 if(await PayOutSpoils(discordId, balance * 3))
-                    return new RouletteResponse(rouletteNumber, balance * 3);
+                    return new RouletteResponse(rouletteNumber, balance, balance * 3);
             }
 
-            return new RouletteResponse(rouletteNumber, 0);
+            return new RouletteResponse(rouletteNumber,  0, 0);
         }
 
         return null;
@@ -352,10 +352,10 @@ public class CoinCommandsService
             if ((isColourRedBet && redColours.Contains(rouletteNumber)) || !isColourRedBet && !redColours.Contains(rouletteNumber))
             {
                 if(await PayOutSpoils(discordId, balance * 2))
-                    return new RouletteResponse(rouletteNumber, balance * 2);
+                    return new RouletteResponse(rouletteNumber, balance, balance * 2);
             }
             
-            return new RouletteResponse(rouletteNumber, 0);
+            return new RouletteResponse(rouletteNumber, 0, 0);
         }
 
         return null;

@@ -49,7 +49,7 @@ public class CoinCommandsService
         var baseClaim = GetBaseClaim();
         account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) ? account.Streak + 1 : 0;
 
-        var totalClaim = baseClaim + account.Streak;
+        var totalClaim = baseClaim + Math.Min(account.Streak, 10);
         
         //Add reward
         var nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);

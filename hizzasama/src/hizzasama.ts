@@ -54,6 +54,12 @@ interface CoinEconomyResponse {
   PercentageEconomy: number;
 }
 
+interface RouletteResponse {
+  RouletteNumber : number;
+  Bet : number;
+  Payout : number;
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const token = process.env["DISCORD_BOT_TOKEN"];
@@ -137,7 +143,8 @@ if (process.argv[2]) {
           name: 'amount',
           description: 'The amount of HizzaCoin to give',
           required: true,
-          type: 4
+          type: 4,
+          min_value: 1
         }
       ]
     },
@@ -155,7 +162,8 @@ if (process.argv[2]) {
           name: 'wager',
           description: 'Optionally wager hizzacoin in your challenge',
           required: false,
-          type: 4
+          type: 4,
+          min_value: 1
         }
       ]
     },
@@ -167,7 +175,8 @@ if (process.argv[2]) {
           name: 'maximum',
           description: 'How many sides to the dice (default is 6)',
           required: false,
-          type: 4
+          type: 4,
+          min_value: 1
         }
       ]
     },
@@ -228,8 +237,68 @@ if (process.argv[2]) {
           type: 3
         }
       ]
-    }
-
+    },
+    {
+      name: "roulettenumber",
+      description: "Guess number between 1 and 35, PAYOUT X35 IF GUESSED",
+      options: [
+        {
+          name: "number",
+          description: "Guessed number between 1 and 35",
+          required: true,
+          type: 4,          
+          min_value: 1,
+          max_value: 35
+        },
+        {
+          name: 'bet',
+          description: 'How much to gamble',
+          required: true,
+          type: 4,
+          min_value: 1
+        }
+      ]
+    },
+    {
+      name: "roulettecolour",
+      description: "Guess colour of roulette number, PAYOUT X2 IF GUESSED",
+      options: [
+        {
+          name: "red",
+          description: "Whether to bet on red or not (otherwise black)",
+          required: true,
+          type: 5
+        },
+        {
+          name: 'bet',
+          description: 'How much to gamble',
+          required: true,
+          type: 4,
+          min_value: 1
+        }
+      ]
+    },
+    {
+      name: "roulettetwelves",
+      description: "Guess which group of twelves number belongs to, 1st, 2nd or 3rd, PAYOUT X3 IF GUESSED",
+      options: [
+        {
+          name: "groupOfTwelves",
+          description: "Which group of twelves to bet on (1st set of twelves, 2nd, or 3rd)",
+          required: true,
+          type: 4,                 
+          min_value: 1,
+          max_value: 3
+        },
+        {
+          name: 'bet',
+          description: 'How much to gamble',
+          required: true,
+          type: 4,
+          min_value: 1
+        }
+      ]
+    },
   ];
 
   const rest = new REST({ version: '10' }).setToken(token!);
@@ -482,8 +551,11 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     case "jojoref":           try { await jojoRef(interaction); }         catch (err) { console.error(err) } break;
     case "destiny":           try { await destiny(interaction); }         catch (err) { console.error(err) } break;
     case "tell":              try { await tell(interaction); }            catch (err) { console.error(err) } break;
-    case "imagine":           try { await imagine(interaction); }            catch (err) { console.error(err) } break;
+    case "imagine":           try { await imagine(interaction); }         catch (err) { console.error(err) } break;
     case "counter":           try { await counter(interaction); }         catch (err) { console.error(err) } break;
+    case "roulettenumber":    try { await rouletteNumber(interaction); }  catch (err) { console.error(err) } break;
+    case "roulettecolour":    try { await rouletteColour(interaction); }  catch (err) { console.error(err) } break;
+    case "roulettetwelves":   try { await rouletteTwelves(interaction); } catch (err) { console.error(err) } break;
   }
 });
 
@@ -946,6 +1018,45 @@ export async function destiny(interaction: ChatInputCommandInteraction) {
   }else{
     return;
   }  
+}
+
+export async function rouletteNumber(interaction: ChatInputCommandInteraction) {
+  if(interaction){
+    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-number?discordId=${interaction.user.id}&numberBet=${interaction.options!.get('number')!.value!}&balance=${interaction.options!.get('bet')!.value!}`)).json();
+
+    // let responseText = "";
+    // if(response.Bet > 0)
+    //   responseText += ` (\`${response.Bet}\` of which has been wagered)`
+    // responseText = `${interaction.options!.get('person') ? '<@'+interaction.options!.get('person')!.user!.id! + '> has' : 'You have'} \`${response.Balance}\` HizzaCoin 🪙`;
+
+    await interaction.reply(JSON.stringify(response));
+  }
+}
+
+export async function rouletteColour(interaction: ChatInputCommandInteraction) {
+  if(interaction){
+    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-colour?discordId=${interaction.user.id}&isColourRedBet=${interaction.options!.get('red')!.value!}&balance=${interaction.options!.get('bet')!.value!}`)).json();
+
+    // let responseText = "";
+    // if(response.Bet > 0)
+    //   responseText += ` (\`${response.Bet}\` of which has been wagered)`
+    // responseText = `${interaction.options!.get('person') ? '<@'+interaction.options!.get('person')!.user!.id! + '> has' : 'You have'} \`${response.Balance}\` HizzaCoin 🪙`;
+
+    await interaction.reply(JSON.stringify(response));
+  }
+}
+
+export async function rouletteTwelves(interaction: ChatInputCommandInteraction) {
+  if(interaction){
+    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-twelves?discordId=${interaction.user.id}&twelveBet=${interaction.options!.get('number')!.value!}&balance=${interaction.options!.get('bet')!.value!}`)).json();
+
+    // let responseText = "";
+    // if(response.Bet > 0)
+    //   responseText += ` (\`${response.Bet}\` of which has been wagered)`
+    // responseText = `${interaction.options!.get('person') ? '<@'+interaction.options!.get('person')!.user!.id! + '> has' : 'You have'} \`${response.Balance}\` HizzaCoin 🪙`;
+
+    await interaction.reply(JSON.stringify(response));
+  }
 }
 
 const getDestinyVal = () => {

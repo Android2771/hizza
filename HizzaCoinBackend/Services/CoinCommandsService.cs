@@ -104,7 +104,7 @@ public class CoinCommandsService
         var account = await _accountsService.GetAsyncByDiscordId(discordId);
         if (account == null)
             return null;
-        return new CoinBalanceResponse(account.Balance, await GetEffectiveBalance(account));
+        return new CoinBalanceResponse(account.Balance, await GetWageredBalance(account));
     }
     
     public async Task<List<Account>> CoinLeaderboard()
@@ -133,19 +133,19 @@ public class CoinCommandsService
         return null;
     }
     
-    public async Task<CoinBalanceResponse?> CoinGive(string senderDiscordId, string receiverDiscordId, int amountToSend)
+    public async Task<bool> CoinGive(string senderDiscordId, string receiverDiscordId, int amountToSend)
     {
         if (amountToSend <= 0)
-            return null;
+            return false;
         
         var senderAccount = await _accountsService.GetAsyncByDiscordId(senderDiscordId);
         var receiverAccount = await _accountsService.GetAsyncByDiscordId(receiverDiscordId);
         if (senderAccount == null || receiverAccount == null)
-            return null;
+            return false;
         
-        var effectiveBalance = await GetEffectiveBalance(senderAccount);
+        var effectiveBalance = senderAccount.Balance - await GetWageredBalance(senderAccount);
         if (senderAccount?.Id == null || receiverAccount?.Id == null || effectiveBalance < amountToSend || receiverAccount.Id == senderAccount.Id)
-            return null;
+            return false;
         
         senderAccount.Balance -= amountToSend;
         receiverAccount.Balance += amountToSend;
@@ -153,7 +153,7 @@ public class CoinCommandsService
         await _accountsService.UpdateAsync(senderAccount.Id, senderAccount);
         await _accountsService.UpdateAsync(receiverAccount.Id, receiverAccount);
         
-        return new CoinBalanceResponse(senderAccount.Balance, effectiveBalance);
+        return true;
     }
     
     public async Task<Challenge?> InitiateChallenge(string challengerDiscordId, string challengedDiscordId, int wager)
@@ -165,8 +165,8 @@ public class CoinCommandsService
         var challengedAccount = await _accountsService.GetAsyncByDiscordId(challengedDiscordId);
         if (challengerAccount?.Id == null
             || challengedAccount?.Id == null 
-            || await GetEffectiveBalance(challengerAccount) < wager 
-            || await GetEffectiveBalance(challengedAccount) < wager 
+            || await GetWageredBalance(challengerAccount) < wager 
+            || await GetWageredBalance(challengedAccount) < wager 
             || challengedAccount.Id == challengerAccount.Id)
             return null;
 
@@ -206,7 +206,7 @@ public class CoinCommandsService
                 //If challenged responds, take bet amount
                 challenge.ChallengedHand = hand;
                 var challengedAccount = await _accountsService.GetAsyncByDiscordId(discordId);
-                if (challengedAccount == null || await GetEffectiveBalance(challengedAccount) < challenge.Wager)
+                if (challengedAccount == null || await GetWageredBalance(challengedAccount) < challenge.Wager)
                     return null;
             }
         }
@@ -282,7 +282,7 @@ public class CoinCommandsService
         return Math.Round(randomValue, 2);
     }
 
-    private async Task<int> GetEffectiveBalance(Account account)
+    private async Task<int> GetWageredBalance(Account account)
     {
         var challenges = await _challengesService.GetAsyncByDiscordId(account.DiscordId);
         var totalBetAmount = challenges
@@ -290,7 +290,7 @@ public class CoinCommandsService
                         && o.State == ChallengeState.InProgress)
             .Sum(o => o.Wager);
 
-        return account.Balance - totalBetAmount;
+        return totalBetAmount;
     }
 
     private ChallengeState ComputeRockPaperScissors(Hand playerOneHand, Hand playerTwoHand)

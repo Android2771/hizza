@@ -570,11 +570,18 @@ export async function coinDelete(interaction: ChatInputCommandInteraction) {
 
 export async function coinGive(interaction: ChatInputCommandInteraction | undefined) {
   if(interaction){
-    const response = await fetch(`http://localhost:8080/api/coin-commands/coin-give?
-                                senderDiscordId=${interaction.user.id}
-                                &receiverDiscordId=${interaction.options!.get('payee')!.user!.id}
-                                &amountToSend=${parseInt((interaction.options!.get('amount')!.value)!.toString())}`);
-    await interaction.reply(`\`\`\`json\n${await response.text()}\`\`\``);
+    const senderDiscordId = interaction.user.id;
+    const receiverDiscordId = interaction.options!.get('payee')!.user!.id;
+    const amountToSend = parseInt((interaction.options!.get('amount')!.value)!.toString());
+
+    if(senderDiscordId === receiverDiscordId)
+      return await interaction.reply({content: "You cannot send HizzaCoin to yourself!", ephemeral: true})
+    if(amountToSend <= 0)
+      return await interaction.reply({content: "You must send at least 1 HizzaCoin!", ephemeral: true})
+    const response = await (await fetch(`http://localhost:8080/api/coin-commands/coin-give?senderDiscordId=${senderDiscordId}&receiverDiscordId=${receiverDiscordId}&amountToSend=${amountToSend}`)).json();
+    if(response.status === 400 || !response)
+      return await interaction.reply({content: "You do not have enough HizzaCoin to perform this action! Try `coin claim` to get more", ephemeral: true})
+    return await interaction.reply(`Sent \`${amountToSend}\` HizzaCoin to <@${receiverDiscordId}>!`)
   }
 }
 export async function challenge(interaction: ChatInputCommandInteraction) {

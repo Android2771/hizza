@@ -27,7 +27,7 @@ services:
       - hizzacoin-database
     restart: unless-stopped
     network_mode: host
-    
+
   hizzacoin-database:
     image: mongodb/mongodb-community-server:latest
     container_name: hizzacoin-database

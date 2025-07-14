@@ -35,7 +35,7 @@ public class CoinCommandsController
         await _coinCommandsService.CoinEconomy(discordId);
 
     [HttpGet("coin-give")]
-    public async Task<ActionResult<CoinBalanceResponse?>> CoinGive(string senderDiscordId, string receiverDiscordId, int amountToSend) =>
+    public async Task<ActionResult<bool>> CoinGive(string senderDiscordId, string receiverDiscordId, int amountToSend) =>
         await _coinCommandsService.CoinGive(senderDiscordId, receiverDiscordId, amountToSend);
 
     [HttpGet("initiate-challenge")]

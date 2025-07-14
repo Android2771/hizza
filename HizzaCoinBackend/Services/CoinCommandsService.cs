@@ -98,7 +98,6 @@ public class CoinCommandsService
             totalClaim,
             true
         );
-        ;
     }
 
     public async Task<CoinBalanceResponse?> CoinBalance(string discordId)
@@ -147,14 +146,14 @@ public class CoinCommandsService
             return false;
 
         var effectiveBalance = isHizza ? amountToSend : senderAccount.Balance - await GetWageredBalance(senderAccount);
-        if (senderAccount?.Id == null || receiverAccount?.Id == null || effectiveBalance < amountToSend ||
+        if (senderAccount.Id == null || receiverAccount?.Id == null || effectiveBalance < amountToSend ||
             receiverAccount.Id == senderAccount.Id)
             return false;
 
         senderAccount.Balance -= isHizza ? 0 : amountToSend;
         receiverAccount.Balance += amountToSend;
 
-        Transaction transaction = new Transaction(
+        var transaction = new Transaction(
             senderDiscordId,
             receiverDiscordId,
             amountToSend,
@@ -275,17 +274,12 @@ public class CoinCommandsService
     private async Task<bool> HandleOldChallenge(string challengeId)
     {
         var challenge = await _challengesService.GetAsync(challengeId);
-        if (challenge != null)
-        {
-            if (challenge.State == ChallengeState.InProgress)
-            {
-                challenge.State = ChallengeState.Expired;
-                await _challengesService.UpdateAsync(challenge.Id, challenge);
-                return true;
-            }
-        }
-
-        return false;
+        if (challenge is not { State: ChallengeState.InProgress })
+            return false;
+        
+        challenge.State = ChallengeState.Expired;
+        await _challengesService.UpdateAsync(challenge.Id, challenge);
+        return true;
     }
 
     public async Task<RouletteResponse?> RouletteNumber(string discordId, int numberBet, int balance)
@@ -293,7 +287,7 @@ public class CoinCommandsService
         Random random = new Random();
         var rouletteNumber = random.Next(1, 37);
         
-            if (numberBet >= 1 && numberBet <= 36 
+            if (numberBet is >= 1 and <= 36 
                 && await TakeBet(discordId, balance) 
                 && numberBet == rouletteNumber
                 && await PayOutSpoils(discordId, balance * 35))
@@ -307,9 +301,12 @@ public class CoinCommandsService
         Random random = new Random();
         var rouletteNumber = random.Next(1, 37);
         
-        if (twelveBet >= 1 && twelveBet <= 3 && await TakeBet(discordId, balance) && (twelveBet == 1 && rouletteNumber <= 12) ||
-            (twelveBet == 2 && rouletteNumber >= 13 && rouletteNumber <= 24) ||
-            twelveBet == 3 && rouletteNumber >= 25 && await PayOutSpoils(discordId, balance * 3))
+        if (twelveBet is >= 1 and <= 3 && 
+            await TakeBet(discordId, balance) 
+            && (twelveBet == 1 && rouletteNumber is >= 1 and <= 12) ||
+                (twelveBet == 2 && rouletteNumber is >= 13 and <= 24) ||
+                (twelveBet == 3 && rouletteNumber is >= 25 and <= 36)
+            && await PayOutSpoils(discordId, balance * 3))
             return new RouletteResponse(rouletteNumber, balance, balance * 3);
 
         return new RouletteResponse(rouletteNumber,  0, 0);
@@ -342,16 +339,16 @@ public class CoinCommandsService
         DateTime date = DateTime.Now;
         int seed = date.Day + date.Month;
 
-        if (seed % 3 == 0 || seed % 5 == 0) // big destiny
+        if (seed % 3 == 0 || seed % 5 == 0)
             return 5;
-        else if (seed % 17 == 0) // insane destiny
+        if (seed % 17 == 0)
             return 10;
-        else if (seed % 4 == 0 || seed % 7 == 0) // very big destiny
+        if (seed % 4 == 0 || seed % 7 == 0)
             return 7;
-        else if (seed % 2 == 1) // somewhat big destiny
+        if (seed % 2 == 1)
             return 4;
-        else // small destiny
-            return 2;
+        
+        return 2;
     }
 
     private double GetMultiplier()

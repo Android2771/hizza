@@ -4,5 +4,6 @@ public enum TransactionType
 {
     Claim = 1,
     Challenge = 2,
-    Give = 3
+    Give = 3,
+    Roulette = 4
 }

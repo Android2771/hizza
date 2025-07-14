@@ -6,6 +6,10 @@ namespace HizzaCoinBackend.Models;
 
 public class Transaction
 {
+    public Transaction()
+    {
+    }
+
     public Transaction(string senderDiscordId, string receiverDiscordId, int amount, DateTime date, TransactionType transactionType)
     {
         SenderDiscordId = senderDiscordId;

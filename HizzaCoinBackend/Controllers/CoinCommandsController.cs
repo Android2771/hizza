@@ -35,8 +35,8 @@ public class CoinCommandsController
         await _coinCommandsService.CoinEconomy(discordId);
 
     [HttpGet("coin-give")]
-    public async Task<ActionResult<CoinBalanceResponse?>> CoinGive(string senderDiscordId, string receiverDiscordId, int amountToSend) =>
-        await _coinCommandsService.CoinGive(senderDiscordId, receiverDiscordId, amountToSend);
+    public async Task<ActionResult<bool>> CoinGive(string senderDiscordId, string receiverDiscordId, int amountToSend) =>
+        await _coinCommandsService.CoinGive(senderDiscordId, receiverDiscordId, amountToSend, false);
 
     [HttpGet("initiate-challenge")]
     public async Task<ActionResult<Challenge?>> InitiateChallenge(string challengerDiscordId, string challengedDiscordId, int wager) =>
@@ -46,4 +46,18 @@ public class CoinCommandsController
     public async Task<ActionResult<Challenge?>> RespondChallenge(string discordId, string challengeId, Hand hand) =>
         await _coinCommandsService.RespondChallenge(discordId, challengeId, hand);
     
+    [HttpGet("roulette-number")]
+
+    public async Task<ActionResult<RouletteResponse?>> RouletteNumber(string discordId, int numberBet, int balance) =>
+        await _coinCommandsService.RouletteNumber(discordId, numberBet, balance);
+    
+    [HttpGet("roulette-twelve")]
+
+    public async Task<ActionResult<RouletteResponse?>> RouletteTwelve(string discordId, int twelveBet, int balance) =>
+        await _coinCommandsService.RouletteTwelve(discordId, twelveBet, balance);
+    
+    [HttpGet("roulette-colour")]
+
+    public async Task<ActionResult<RouletteResponse?>> RouletteColour(string discordId, bool isColourRedBet, int balance) =>
+        await _coinCommandsService.RouletteColour(discordId, isColourRedBet, balance);
 }

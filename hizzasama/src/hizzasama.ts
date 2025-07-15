@@ -239,20 +239,20 @@ if (process.argv[2]) {
       ]
     },
     {
-      name: "roulettenumber",
-      description: "Guess number between 1 and 35, PAYOUT X35 IF GUESSED",
+      name: "guessnumber",
+      description: "Guess number with 35 times hizzacoin potential",
       options: [
         {
           name: "number",
-          description: "Guessed number between 1 and 35",
+          description: "Which number",
           required: true,
-          type: 4,          
+          type: 4,                 
           min_value: 1,
           max_value: 35
         },
         {
-          name: 'bet',
-          description: 'How much to gamble',
+          name: 'amount',
+          description: 'How much hizzacoin',
           required: true,
           type: 4,
           min_value: 1
@@ -260,18 +260,18 @@ if (process.argv[2]) {
       ]
     },
     {
-      name: "roulettecolour",
-      description: "Guess colour of roulette number, PAYOUT X2 IF GUESSED",
+      name: "guesscolour",
+      description: "Guess colour which number lands on with 2 times hizzacoin potential",
       options: [
         {
           name: "red",
-          description: "Whether to bet on red or not (otherwise black)",
+          description: "True if red, False if black",
           required: true,
           type: 5
         },
         {
-          name: 'bet',
-          description: 'How much to gamble',
+          name: 'amount',
+          description: 'How much hizzacoin',
           required: true,
           type: 4,
           min_value: 1
@@ -279,26 +279,26 @@ if (process.argv[2]) {
       ]
     },
     {
-      name: "roulettetwelves",
-      description: "Guess which group of twelves number belongs to, 1st, 2nd or 3rd, PAYOUT X3 IF GUESSED",
+      name: "guesstwelve",
+      description: "Which set of twelves, 1st 2nd or 3rd with 3 times hizzacoin potential",
       options: [
         {
-          name: "groupOfTwelves",
-          description: "Which group of twelves to bet on (1st set of twelves, 2nd, or 3rd)",
+          name: "twelve",
+          description: "1st 2nd or 3rd set of twelves",
           required: true,
           type: 4,                 
           min_value: 1,
           max_value: 3
         },
         {
-          name: 'bet',
-          description: 'How much to gamble',
+          name: 'amount',
+          description: 'How much hizzacoin',
           required: true,
           type: 4,
           min_value: 1
         }
       ]
-    },
+    }
   ];
 
   const rest = new REST({ version: '10' }).setToken(token!);

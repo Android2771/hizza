@@ -2,7 +2,7 @@
 
 public class RouletteResponse
 {
-    public RouletteResponse(int rouletteNumber, int payout, int bet)
+    public RouletteResponse(int rouletteNumber, int bet, int payout)
     {
         RouletteNumber = rouletteNumber;
         Bet = bet;

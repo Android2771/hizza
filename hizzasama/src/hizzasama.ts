@@ -251,7 +251,7 @@ if (process.argv[2]) {
           max_value: 36
         },
         {
-          name: 'amount',
+          name: 'wager',
           description: 'How much HizzaCoin to wager',
           required: true,
           type: 4,
@@ -270,7 +270,7 @@ if (process.argv[2]) {
           type: 5
         },
         {
-          name: 'amount',
+          name: 'wager',
           description: 'How much hizzacoin',
           required: true,
           type: 4,
@@ -291,7 +291,7 @@ if (process.argv[2]) {
           max_value: 3
         },
         {
-          name: 'amount',
+          name: 'wager',
           description: 'How much hizzacoin',
           required: true,
           type: 4,
@@ -1029,7 +1029,7 @@ export async function destiny(interaction: ChatInputCommandInteraction) {
 
 export async function rouletteNumber(interaction: ChatInputCommandInteraction) {
   if(interaction){
-    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-number?discordId=${interaction.user.id}&numberBet=${interaction.options!.get('number')!.value!}&bet=${interaction.options!.get('amount')!.value!}`)).json();
+    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-number?discordId=${interaction.user.id}&numberBet=${interaction.options!.get('number')!.value!}&bet=${interaction.options!.get('wager')!.value!}`)).json();
     if(response.Payout > 0){
       await interaction.reply(`You managed to guess the number \`${response.RouletteNumber}\`! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin {Amount: 69}(x35) 🪙🪙🪙!`)
     }else{
@@ -1040,7 +1040,7 @@ export async function rouletteNumber(interaction: ChatInputCommandInteraction) {
 
 export async function rouletteColour(interaction: ChatInputCommandInteraction) {
   if(interaction){
-    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-colour?discordId=${interaction.user.id}&isColourRedBet=${interaction.options!.get('red')!.value!}&bet=${interaction.options!.get('amount')!.value!}`)).json();
+    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-colour?discordId=${interaction.user.id}&isColourRedBet=${interaction.options!.get('red')!.value!}&bet=${interaction.options!.get('wager')!.value!}`)).json();
     if(response.Payout > 0){
       await interaction.reply(`You managed to guess the colour of the number \`${response.RouletteNumber}\`! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin (x2) 🪙🪙🪙`)
     }else{
@@ -1051,7 +1051,7 @@ export async function rouletteColour(interaction: ChatInputCommandInteraction) {
 
 export async function rouletteTwelves(interaction: ChatInputCommandInteraction) {
   if(interaction){
-    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-twelves?discordId=${interaction.user.id}&twelveBet=${interaction.options!.get('twelve')!.value!}&bet=${interaction.options!.get('amount')!.value!}`)).json();
+    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-twelves?discordId=${interaction.user.id}&twelveBet=${interaction.options!.get('twelve')!.value!}&bet=${interaction.options!.get('wager')!.value!}`)).json();
     if(response.Payout > 0){
       await interaction.reply(`You managed to guess the twelve of the number \`${response.RouletteNumber}\`! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin (x3) 🪙🪙🪙!`)
     }else{

@@ -553,9 +553,9 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     case "tell":              try { await tell(interaction); }            catch (err) { console.error(err) } break;
     case "imagine":           try { await imagine(interaction); }         catch (err) { console.error(err) } break;
     case "counter":           try { await counter(interaction); }         catch (err) { console.error(err) } break;
-    case "roulettenumber":    try { await rouletteNumber(interaction); }  catch (err) { console.error(err) } break;
-    case "roulettecolour":    try { await rouletteColour(interaction); }  catch (err) { console.error(err) } break;
-    case "roulettetwelves":   try { await rouletteTwelves(interaction); } catch (err) { console.error(err) } break;
+    case "guessnumber":    try { await rouletteNumber(interaction); }  catch (err) { console.error(err) } break;
+    case "guesscolour":    try { await rouletteColour(interaction); }  catch (err) { console.error(err) } break;
+    case "guesstwelve":   try { await rouletteTwelves(interaction); } catch (err) { console.error(err) } break;
   }
 });
 

@@ -1029,7 +1029,7 @@ export async function destiny(interaction: ChatInputCommandInteraction) {
 
 export async function rouletteNumber(interaction: ChatInputCommandInteraction) {
   if(interaction){
-    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-number?discordId=${interaction.user.id}&numberBet=${interaction.options!.get('number')!.value!}&balance=${interaction.options!.get('bet')!.value!}`)).json();
+    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-number?discordId=${interaction.user.id}&numberBet=${interaction.options!.get('number')!.value!}&balance=${interaction.options!.get('amount')!.value!}`)).json();
 
     // let responseText = "";
     // if(response.Bet > 0)
@@ -1042,7 +1042,7 @@ export async function rouletteNumber(interaction: ChatInputCommandInteraction) {
 
 export async function rouletteColour(interaction: ChatInputCommandInteraction) {
   if(interaction){
-    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-colour?discordId=${interaction.user.id}&isColourRedBet=${interaction.options!.get('red')!.value!}&balance=${interaction.options!.get('bet')!.value!}`)).json();
+    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-colour?discordId=${interaction.user.id}&isColourRedBet=${interaction.options!.get('red')!.value!}&balance=${interaction.options!.get('amount')!.value!}`)).json();
 
     // let responseText = "";
     // if(response.Bet > 0)
@@ -1055,7 +1055,7 @@ export async function rouletteColour(interaction: ChatInputCommandInteraction) {
 
 export async function rouletteTwelves(interaction: ChatInputCommandInteraction) {
   if(interaction){
-    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-twelves?discordId=${interaction.user.id}&twelveBet=${interaction.options!.get('number')!.value!}&balance=${interaction.options!.get('bet')!.value!}`)).json();
+    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-twelves?discordId=${interaction.user.id}&twelveBet=${interaction.options!.get('number')!.value!}&balance=${interaction.options!.get('amount')!.value!}`)).json();
 
     // let responseText = "";
     // if(response.Bet > 0)

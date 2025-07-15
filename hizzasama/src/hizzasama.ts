@@ -306,7 +306,7 @@ if (process.argv[2]) {
     try {
       console.log('Started refreshing application (/) commands.');
 
-      await rest.put(Routes.applicationCommands("1392080379862712472"), { body: commands });
+      await rest.put(Routes.applicationCommands("1076237275513487361"), { body: commands });
 
       console.log('Successfully reloaded application (/) commands.');
     } catch (error) {

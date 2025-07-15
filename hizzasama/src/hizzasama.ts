@@ -1051,7 +1051,7 @@ export async function rouletteColour(interaction: ChatInputCommandInteraction) {
 
 export async function rouletteTwelves(interaction: ChatInputCommandInteraction) {
   if(interaction){
-    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-twelves?discordId=${interaction.user.id}&twelveBet=${interaction.options!.get('twelve')!.value!}&bet=${interaction.options!.get('wager')!.value!}`)).json();
+    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-twelve?discordId=${interaction.user.id}&twelveBet=${interaction.options!.get('twelve')!.value!}&bet=${interaction.options!.get('wager')!.value!}`)).json();
     if(response.Payout > 0){
       await interaction.reply(`You managed to guess the twelve of the number \`${response.RouletteNumber}\`! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin (x3) 🪙🪙🪙!`)
     }else{

@@ -1,7 +1,7 @@
-﻿using System.Runtime.InteropServices.JavaScript;
-using HizzaCoinBackend.Models;
+﻿using HizzaCoinBackend.Models;
 using HizzaCoinBackend.Models.DTOs;
-using MongoDB.Driver;
+using System;
+using System.Security.Cryptography;
 
 namespace HizzaCoinBackend.Services;
 
@@ -284,9 +284,11 @@ public class CoinCommandsService
 
     public async Task<RouletteResponse?> RouletteNumber(string discordId, int numberBet, int bet)
     {
-        Random random = new Random();
-        var rouletteNumber = random.Next(0, 37);
+        var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);
         var spoils = bet * 35;
+        
+        if(numberBet is < 0 or > 36 || !await TakeBet(discordId, bet))
+            return new RouletteResponse(0, 0, 0);
 
         if (numberBet == rouletteNumber)
         {
@@ -301,8 +303,7 @@ public class CoinCommandsService
 
     public async Task<RouletteResponse?> RouletteTwelve(string discordId, int twelveBet, int bet)
     {
-        Random random = new Random();
-        var rouletteNumber = random.Next(0, 37);
+        var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);
         var spoils = bet * 3;
         
         if (twelveBet is < 1 or > 3 || !await TakeBet(discordId, bet))
@@ -323,8 +324,7 @@ public class CoinCommandsService
 
     public async Task<RouletteResponse?> RouletteColour(string discordId, bool isColourRedBet, int bet)
     {
-        Random random = new Random();
-        var rouletteNumber = random.Next(0, 37);
+        var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);
         var spoils = bet * 2;
 
         if (!await TakeBet(discordId, bet))

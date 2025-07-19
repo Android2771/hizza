@@ -1032,8 +1032,10 @@ export async function rouletteNumber(interaction: ChatInputCommandInteraction) {
     const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-number?discordId=${interaction.user.id}&numberBet=${interaction.options!.get('number')!.value!}&bet=${interaction.options!.get('wager')!.value!}`)).json();
     if(response.Payout > 0){
       await interaction.reply(`You managed to guess the number \`${response.RouletteNumber}\`! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin {Amount: 69}(x35) 🪙🪙🪙!`)
+    }else if(response.Bet > 0){
+      await interaction.reply(`You did not manage to guess the twelve of the number \`${response.RouletteNumber}\` and lost \`${response.Bet}\` HizzaCoin`)
     }else{
-      await interaction.reply(`You did not manage to guess the number \`${response.RouletteNumber}\` and lost \`${response.Bet}\` HizzaCoin`)
+      await interaction.reply(`You do not have enough money to bet!`)
     }
   }
 }
@@ -1043,8 +1045,10 @@ export async function rouletteColour(interaction: ChatInputCommandInteraction) {
     const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-colour?discordId=${interaction.user.id}&isColourRedBet=${interaction.options!.get('red')!.value!}&bet=${interaction.options!.get('wager')!.value!}`)).json();
     if(response.Payout > 0){
       await interaction.reply(`You managed to guess the colour of the number \`${response.RouletteNumber}\`! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin (x2) 🪙🪙🪙`)
+    }else if(response.Bet > 0){
+      await interaction.reply(`You did not manage to guess the twelve of the number \`${response.RouletteNumber}\` and lost \`${response.Bet}\` HizzaCoin`)
     }else{
-      await interaction.reply(`You did not manage to guess the colour of the number \`${response.RouletteNumber}\` and lost \`${response.Bet}\` HizzaCoin`)
+      await interaction.reply(`You do not have enough money to bet!`)
     }
   }
 }
@@ -1054,8 +1058,10 @@ export async function rouletteTwelves(interaction: ChatInputCommandInteraction) 
     const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-twelve?discordId=${interaction.user.id}&twelveBet=${interaction.options!.get('twelve')!.value!}&bet=${interaction.options!.get('wager')!.value!}`)).json();
     if(response.Payout > 0){
       await interaction.reply(`You managed to guess the twelve of the number \`${response.RouletteNumber}\`! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin (x3) 🪙🪙🪙!`)
-    }else{
+    }else if(response.Bet > 0){
       await interaction.reply(`You did not manage to guess the twelve of the number \`${response.RouletteNumber}\` and lost \`${response.Bet}\` HizzaCoin`)
+    }else{
+      await interaction.reply(`You do not have enough money to bet!`)
     }
   }
 }

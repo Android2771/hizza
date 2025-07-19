@@ -1035,7 +1035,7 @@ export async function rouletteNumber(interaction: ChatInputCommandInteraction) {
     }else if(response.Bet > 0){
       await interaction.reply(`You did not manage to guess the twelve of the number \`${response.RouletteNumber}\` and lost \`${response.Bet}\` HizzaCoin`)
     }else{
-      await interaction.reply(`You do not have enough money to bet!`)
+      await interaction.reply(`You do not have enough money to bet! Try \`coin claim\` to get more`)
     }
   }
 }
@@ -1048,7 +1048,7 @@ export async function rouletteColour(interaction: ChatInputCommandInteraction) {
     }else if(response.Bet > 0){
       await interaction.reply(`You did not manage to guess the twelve of the number \`${response.RouletteNumber}\` and lost \`${response.Bet}\` HizzaCoin`)
     }else{
-      await interaction.reply(`You do not have enough money to bet!`)
+      await interaction.reply(`You do not have enough money to bet! Try \`coin claim\` to get more`)
     }
   }
 }
@@ -1061,7 +1061,7 @@ export async function rouletteTwelves(interaction: ChatInputCommandInteraction) 
     }else if(response.Bet > 0){
       await interaction.reply(`You did not manage to guess the twelve of the number \`${response.RouletteNumber}\` and lost \`${response.Bet}\` HizzaCoin`)
     }else{
-      await interaction.reply(`You do not have enough money to bet!`)
+      await interaction.reply(`You do not have enough money to bet! Try \`coin claim\` to get more`)
     }
   }
 }

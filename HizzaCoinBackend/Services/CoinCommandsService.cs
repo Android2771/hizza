@@ -286,48 +286,60 @@ public class CoinCommandsService
     {
         Random random = new Random();
         var rouletteNumber = random.Next(0, 37);
-        var spoils = 0;
+        var spoils = bet * 35;
 
-        if (numberBet is >= 0 and <= 36
-            && await TakeBet(discordId, bet)
-            && numberBet == rouletteNumber
-            && await PayOutSpoils(discordId, bet * 35))
-            spoils = bet * 35;
+        if (numberBet == rouletteNumber)
+        {
+            if(await PayOutSpoils(discordId, spoils))
+                return new RouletteResponse(rouletteNumber, bet, spoils);
 
-        return new RouletteResponse(rouletteNumber, bet, spoils);
+            return new RouletteResponse(0, 0, 0);
+        }
+
+        return new RouletteResponse(rouletteNumber, bet, 0);
     }
 
     public async Task<RouletteResponse?> RouletteTwelve(string discordId, int twelveBet, int bet)
     {
         Random random = new Random();
         var rouletteNumber = random.Next(0, 37);
-        var spoils = 0;
+        var spoils = bet * 3;
+        
+        if (twelveBet is < 1 or > 3 || !await TakeBet(discordId, bet))
+            return new RouletteResponse(0, 0, 0);
 
-        if (twelveBet is >= 1 and <= 3 &&
-            await TakeBet(discordId, bet)
-            && ((twelveBet == 1 && rouletteNumber is >= 1 and <= 12) ||
-            (twelveBet == 2 && rouletteNumber is >= 13 and <= 24) ||
-            (twelveBet == 3 && rouletteNumber is >= 25 and <= 36))
-            && await PayOutSpoils(discordId, bet * 3))
-            spoils = bet * 3;
+        if ((twelveBet == 1 && rouletteNumber is >= 1 and <= 12) ||
+                (twelveBet == 2 && rouletteNumber is >= 13 and <= 24) ||
+                (twelveBet == 3 && rouletteNumber is >= 25 and <= 36))
+        {
+            if (await PayOutSpoils(discordId, bet * 3))
+                return new RouletteResponse(rouletteNumber, bet, spoils);
+            
+            return new RouletteResponse(0, 0, 0);
+        }
 
-        return new RouletteResponse(rouletteNumber,  bet, spoils);
+        return new RouletteResponse(rouletteNumber, bet, 0);
     }
 
     public async Task<RouletteResponse?> RouletteColour(string discordId, bool isColourRedBet, int bet)
     {
         Random random = new Random();
         var rouletteNumber = random.Next(0, 37);
-        var spoils = 0;
+        var spoils = bet * 2;
+
+        if (!await TakeBet(discordId, bet))
+            return new RouletteResponse(0, 0, 0);
         
         int[] redColours = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 13, 25, 27, 30, 32, 34, 36];
-        if (await TakeBet(discordId, bet) &&
-            (rouletteNumber != 0 
-            && (isColourRedBet && redColours.Contains(rouletteNumber) || !isColourRedBet && !redColours.Contains(rouletteNumber)))
-            && await PayOutSpoils(discordId, bet * 2))
-            spoils = bet * 2;
+        if (rouletteNumber != 0 && (isColourRedBet && redColours.Contains(rouletteNumber) || !isColourRedBet && !redColours.Contains(rouletteNumber)))
+        {
+            if(await PayOutSpoils(discordId, bet * 2))
+                return new RouletteResponse(rouletteNumber, bet, spoils);
 
-        return new RouletteResponse(rouletteNumber, bet, spoils);
+            return new RouletteResponse(0, 0, 0);
+        }
+
+        return new RouletteResponse(rouletteNumber, bet, 0);
     }
 
 

@@ -151,7 +151,7 @@ public class CoinCommandsService
             return false;
 
         senderAccount.Balance -= senderAccount.DiscordId == "0" ? 0 : amountToSend;
-        receiverAccount.Balance += amountToSend;
+        receiverAccount.Balance += receiverAccount.DiscordId == "0" ? 0 : amountToSend;
 
         var transaction = new Transaction(
             senderDiscordId,
@@ -285,10 +285,10 @@ public class CoinCommandsService
     public async Task<RouletteResponse?> RouletteNumber(string discordId, int numberBet, int bet)
     {
         Random random = new Random();
-        var rouletteNumber = random.Next(1, 37);
+        var rouletteNumber = random.Next(0, 37);
         var spoils = 0;
 
-        if (numberBet is >= 1 and <= 36
+        if (numberBet is >= 0 and <= 36
             && await TakeBet(discordId, bet)
             && numberBet == rouletteNumber
             && await PayOutSpoils(discordId, bet * 35))
@@ -300,7 +300,7 @@ public class CoinCommandsService
     public async Task<RouletteResponse?> RouletteTwelve(string discordId, int twelveBet, int bet)
     {
         Random random = new Random();
-        var rouletteNumber = random.Next(1, 37);
+        var rouletteNumber = random.Next(0, 37);
         var spoils = 0;
 
         if (twelveBet is >= 1 and <= 3 &&
@@ -317,13 +317,13 @@ public class CoinCommandsService
     public async Task<RouletteResponse?> RouletteColour(string discordId, bool isColourRedBet, int bet)
     {
         Random random = new Random();
-        var rouletteNumber = random.Next(1, 37);
+        var rouletteNumber = random.Next(0, 37);
         var spoils = 0;
         
         int[] redColours = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 13, 25, 27, 30, 32, 34, 36];
         if (await TakeBet(discordId, bet) &&
-            (isColourRedBet && redColours.Contains(rouletteNumber) || !isColourRedBet &&
-            !redColours.Contains(rouletteNumber))
+            (rouletteNumber != 0 
+            && (isColourRedBet && redColours.Contains(rouletteNumber) || !isColourRedBet && !redColours.Contains(rouletteNumber)))
             && await PayOutSpoils(discordId, bet * 2))
             spoils = bet * 2;
 

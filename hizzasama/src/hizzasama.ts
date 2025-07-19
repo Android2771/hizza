@@ -240,14 +240,14 @@ if (process.argv[2]) {
     },
     {
       name: "guessnumber",
-      description: "Guess number between 1 and 36 with a chance to win x35 your HizzaCoin",
+      description: "Guess number between 0 and 36 with a chance to win x35 your HizzaCoin",
       options: [
         {
           name: "number",
-          description: "Which number between 1 and 36",
+          description: "Which number between 0 and 36",
           required: true,
           type: 4,                 
-          min_value: 1,
+          min_value: 0,
           max_value: 36
         },
         {

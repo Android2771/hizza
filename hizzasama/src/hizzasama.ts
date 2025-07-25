@@ -703,7 +703,6 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
         const timeout = 900000;
         const buttonCollector = interaction.channel!.createMessageComponentCollector({ time: timeout });
         
-        let winner = -1;
         let answers : {[key: string] : string} = {};
 
         buttonCollector.on('collect', async (buttonInteraction : ButtonInteraction) => {
@@ -719,7 +718,7 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
             });
             return;
           }
-        }
+        });
       }               
     }    
 }

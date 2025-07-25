@@ -124,8 +124,8 @@ public class CoinCommandsService
             var leaderboardPlace = accounts
                 .Where(o => o.Balance > requesterAccount.Balance)
                 .ToList()
-                .Count;
-            double economyPercentage = ((double)requesterAccount.Balance / totalHizzaCoinAmount) * 100;
+                .Count + 1;
+            double economyPercentage = (double)requesterAccount.Balance / totalHizzaCoinAmount * 100;
             economyPercentage = Math.Round(economyPercentage, 2, MidpointRounding.AwayFromZero);
 
             return new CoinEconomyResponse(totalHizzaCoinAmount, totalHizzaCoinAccounts, leaderboardPlace,
@@ -206,12 +206,12 @@ public class CoinCommandsService
 
         if (challenge.State == ChallengeState.InProgress)
         {
-            if (challenge.ChallengerDiscordId == discordId)
+            if (challenge.ChallengerDiscordId == discordId && challenge.ChallengerHand == Hand.NotSelected)
             {
                 //If challenger responds, simply record hand
                 challenge.ChallengerHand = hand;
             }
-            else if (challenge.ChallengedDiscordId == discordId)
+            else if (challenge.ChallengedDiscordId == discordId && challenge.ChallengedHand == Hand.NotSelected)
             {
                 //If challenged responds, take bet amount
                 challenge.ChallengedHand = hand;

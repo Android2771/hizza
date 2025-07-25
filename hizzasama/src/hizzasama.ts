@@ -189,10 +189,6 @@ if (process.argv[2]) {
       description: "Give me a dad joke that'll give me the giggles"
     },
     {
-      name: 'jojoref',
-      description: 'Give me a random quote from JoJo parts 1 through 5'
-    },
-    {
       name: 'destiny',
       description: "I want to know today's destiny."
     },
@@ -548,7 +544,6 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     case "roll":              try { await roll(interaction); }            catch (err) { console.error(err) } break;
     case "flipcoin":          try { await flipcoin(interaction); }        catch (err) { console.error(err) } break;
     case "dadjoke":           try { await dadJoke(interaction); }         catch (err) { console.error(err) } break;
-    case "jojoref":           try { await jojoRef(interaction); }         catch (err) { console.error(err) } break;
     case "destiny":           try { await destiny(interaction); }         catch (err) { console.error(err) } break;
     case "tell":              try { await tell(interaction); }            catch (err) { console.error(err) } break;
     case "imagine":           try { await imagine(interaction); }         catch (err) { console.error(err) } break;
@@ -673,196 +668,60 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
       return;
     }
 
-    const wager : number | null = interaction.options!.get('wager') ? parseInt((interaction.options!.get('wager')!.value)!.toString()) : null;
+    let wager : number | null = interaction.options!.get('wager') ? parseInt((interaction.options!.get('wager')!.value)!.toString()) : 0;
 
-    if(wager){
-      //Ensure wager is valid
-      if(wager != null && true){
-        await interaction.reply(`Wagers are disabled until HIZZACOIN 3.0 fully comes out some time in the next few weeks!`);
-        return;
-      }
+    const response = await (await fetch(`http://localhost:8080/api/coin-commands/initiate-challenge?challengerDiscordId=${interaction.user.id}&challengedDiscordId=${opponent!.user!.id}&wager=${wager}`)).json();  
 
-      //Ensure the challengee can wager that much
-      if(!await addHizzaCoin(interaction.user.id, -wager, true))
-      {
+    if(response){
+        const rock = new ButtonBuilder()
+        .setCustomId(`rock:${challengeId}`)
+        .setLabel('Rock')
+        .setStyle(ButtonStyle.Primary)
+        .setEmoji('🪨');
+
+        const paper = new ButtonBuilder()
+        .setCustomId(`paper:${challengeId}`)
+        .setLabel('Paper')
+        .setStyle(ButtonStyle.Primary)
+        .setEmoji('📰');
+
+        const scissors = new ButtonBuilder()
+        .setCustomId(`scissors:${challengeId}`)
+        .setLabel('Scissors')
+        .setStyle(ButtonStyle.Primary)
+        .setEmoji('✂️');
+
+        const responseRow : any = new ActionRowBuilder()
+        .addComponents(rock, paper, scissors);
+
         await interaction.reply({
-          content: `You cannot wager that much HizzaCoin! ❌🍕`,
-          ephemeral: true
+          content: `${wager ? '🪙🪙🪙' : ''} <@${opponent!.user!.id}> has been challenged by <@${interaction.user.id}>` + (wager ? ` with a **${wager} HizzaCoin wager** 🪙🪙🪙!` : `!`),
+          components: [responseRow],
+          ephemeral: false
         });
+
+        const timeout = 900000;
+        const buttonCollector = interaction.channel!.createMessageComponentCollector({ time: timeout });
         
-        return;
-      }
+        let winner = -1;
+        let answers : {[key: string] : string} = {};
 
-      //if the opponent can also wager that much
-      if(!await addHizzaCoin(opponent!.user!.id, -wager, false)){
-        await addHizzaCoin(interaction.user.id, wager, true);
-        await interaction.reply({
-          content: `<@${opponent!.user!.id}> cannot wager that much HizzaCoin! ❌🍕`,
-          ephemeral: true
-        });
-        
-        return;
-      }
-    }
+        buttonCollector.on('collect', async (buttonInteraction : ButtonInteraction) => {
+          if(buttonInteraction.customId.split(':')[1] !== challengeId)
+            return;
 
-    //check that player did not challenge himself
-    if (interaction.user.id === opponent!.user!.id) {
-      await interaction.reply({
-        content: `You cannot challenge yourself! ❌`,
-        ephemeral: true
-      });
-      
-      return;
-  }
-    
-    const rock = new ButtonBuilder()
-    .setCustomId(`rock:${challengeId}`)
-    .setLabel('Rock')
-    .setStyle(ButtonStyle.Primary)
-    .setEmoji('🪨');
+          const interactor = buttonInteraction.user.id;
 
-    const paper = new ButtonBuilder()
-    .setCustomId(`paper:${challengeId}`)
-    .setLabel('Paper')
-    .setStyle(ButtonStyle.Primary)
-    .setEmoji('📰');
-
-    const scissors = new ButtonBuilder()
-    .setCustomId(`scissors:${challengeId}`)
-    .setLabel('Scissors')
-    .setStyle(ButtonStyle.Primary)
-    .setEmoji('✂️');
-
-    const responseRow : any = new ActionRowBuilder()
-    .addComponents(rock, paper, scissors);
-
-    await interaction.reply({
-      content: `${wager ? '🪙🪙🪙' : ''} <@${opponent!.user!.id}> has been challenged by <@${interaction.user.id}>` + (wager ? ` with a **${wager} HizzaCoin wager** 🪙🪙🪙!` : `!`),
-      components: [responseRow],
-      ephemeral: false
-    });
-
-    const timeout = 900000;
-    const buttonCollector = interaction.channel!.createMessageComponentCollector({ time: timeout });
-    
-    let winner = -1;
-    let answers : {[key: string] : string} = {};
-    let lock = false;
-
-    //Refund if time expires
-    setTimeout(async () => {
-      if(wager && !lock){
-        //Refund challenger always as they put deposit immediately
-        await addHizzaCoin(interaction.user.id, wager, true);
-
-        //Refund opponent maybe because they only get charged on reaction
-        if(answers[opponent!.user!.id])
-          await addHizzaCoin(opponent!.user!.id, wager, true);        
-
-        buttonCollector.stop();
-        lock = false;
-      }
-    }, timeout)
-
-    //THIS IS SUPER NOT OPTIMAL. LETS HOPE IT DOESN'T GET POPULAR
-    buttonCollector.on('collect', async (buttonInteraction : ButtonInteraction) => {
-      if(buttonInteraction.customId.split(':')[1] !== challengeId)
-        return;
-
-      const interactor = buttonInteraction.user.id;
-
-      if(answers[interactor]){
-        await buttonInteraction.reply({
-          content: `You already chose your hand!`,
-          ephemeral: true
-        });
-        return;
-      }
-
-      //Ensure user is valid
-      if(interactor !== interaction.user.id && interactor !== opponent!.user!.id){
-        await buttonInteraction.reply({
-          content: `You are not part of this rock paper scissors match!`,
-          ephemeral: true
-        });
-        return;
-      }else{
-        answers[interactor] = buttonInteraction.customId.split(':')[0];
-        if (Object.keys(answers).length === 1)
-          await buttonInteraction.reply({
-            content: `You chose your hand as ${buttonInteraction.customId.split(':')[0]}!`,
-            ephemeral: true
-          })
-      }
-
-      //Take money from opponent if it is the opponent reacting
-      if(interactor === opponent!.user!.id){
-        if(wager && !(await addHizzaCoin(opponent!.user!.id, -wager, true))){
-          await addHizzaCoin(interaction.user.id, wager, true);
-          buttonCollector.stop();
-          await buttonInteraction.reply({
-            content: `The opponent did not have enough HizzaCoin to match the wager!`,
-            ephemeral: true
-          });
-          return;
+          if(answers[interactor]){
+            await buttonInteraction.reply({
+              content: `You already chose your hand!`,
+              ephemeral: true
+            });
+            return;
+          }
         }
-      }
-
-      //Calculate winner if both parties did their hand  
-      if (Object.keys(answers).length === 2) {
-        buttonCollector.stop();
-        switch (answers[interaction.user.id]) {
-            case 'rock':
-                switch (answers[opponent!.user!.id]) {
-                    case 'paper': winner = 2; break;
-                    case 'scissors': winner = 1; break;
-                    default: winner = 0;
-                }
-                break;
-
-            case 'paper':
-                switch (answers[opponent!.user!.id]) {
-                    case 'rock': winner = 1; break;
-                    case 'scissors': winner = 2; break;
-                    default: winner = 0;
-                }
-                break;
-
-            case 'scissors':
-                switch (answers[opponent!.user!.id]) {
-                    case 'rock': winner = 2; break;
-                    case 'paper': winner = 1; break;
-                    default: winner = 0;
-                }
-                break;
-        }
-        //declare winner and see if any Hizza Coin was wagered
-        if (winner !== 0) {
-            const winnerPlayer = winner === 1 ? interaction.user.id : opponent!.user!.id;   
-            const loserPlayer = winner === 1 ? opponent!.user!.id : interaction.user.id;
-
-            let winMsg = `<@${winnerPlayer}> ${emotes[answers[winnerPlayer]]} beat <@${loserPlayer}> ${emotes[answers[loserPlayer]]}!`
-            if(wager){
-              addHizzaCoin(winnerPlayer, wager * 2, true)
-              winMsg = winMsg + `\n And has won ${wager} HizzaCoin! 🪙`      
-            }
-            if(!lock)
-              await buttonInteraction.reply(winMsg)
-
-            lock = true;
-        }
-        else{
-            await buttonInteraction.reply(`<@${interaction.user.id}> ${emotes[answers[interaction.user.id]]} tied with <@${opponent!.user!.id}> ${emotes[answers[opponent!.user!.id]]}!`)
-            if(wager){
-                await addHizzaCoin(interaction.user.id, wager, true)
-                await addHizzaCoin(opponent!.user!.id, wager, true)
-            }
-        }
-    }     
-    });
-  }else{
-    return;
-  }
+      }               
+    }    
 }
 
 export async function tell(interaction: ChatInputCommandInteraction){
@@ -996,21 +855,6 @@ export async function dadJoke(interaction: ChatInputCommandInteraction) {
   }
 }
 
-export async function jojoRef(interaction: ChatInputCommandInteraction) {
-  if(interaction){
-    fs.readFile(`${__dirname}/../resources/jojo.txt`, 'utf8', async (err, data) => {
-      try {
-          let quotes = data.split("\n")
-          let size = quotes.length;
-          let randomQuoteNo = Math.floor(Math.random() * size);
-          await interaction.reply(quotes[randomQuoteNo])
-      } catch {  }
-    })
-  }else{
-    return;
-  }
-}
-
 export async function destiny(interaction: ChatInputCommandInteraction) {
   if(interaction){  
     const destinyVal = getDestinyVal()
@@ -1033,7 +877,7 @@ export async function rouletteNumber(interaction: ChatInputCommandInteraction) {
     if(response.Payout > 0){
       await interaction.reply(`You managed to guess the number \`${response.RouletteNumber}\`! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin {Amount: 69}(x35) 🪙🪙🪙!`)
     }else if(response.Bet > 0){
-      await interaction.reply(`You did not manage to guess the twelve of the number \`${response.RouletteNumber}\` and lost \`${response.Bet}\` HizzaCoin`)
+      await interaction.reply(`You did not manage to guess the number \`${response.RouletteNumber}\` and lost \`${response.Bet}\` HizzaCoin`)
     }else{
       await interaction.reply(`You do not have enough money to bet!`)
     }
@@ -1046,7 +890,7 @@ export async function rouletteColour(interaction: ChatInputCommandInteraction) {
     if(response.Payout > 0){
       await interaction.reply(`You managed to guess the colour of the number \`${response.RouletteNumber}\`! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin (x2) 🪙🪙🪙`)
     }else if(response.Bet > 0){
-      await interaction.reply(`You did not manage to guess the twelve of the number \`${response.RouletteNumber}\` and lost \`${response.Bet}\` HizzaCoin`)
+      await interaction.reply(`You did not manage to guess the colour of the number \`${response.RouletteNumber}\` and lost \`${response.Bet}\` HizzaCoin`)
     }else{
       await interaction.reply(`You do not have enough money to bet!`)
     }
@@ -1098,61 +942,10 @@ const fetchUsername = async (id: string) => {
   }
 }
 
-async function addHizzaCoin(userId: string, amount: number, commitTransaction: boolean) {
-  let newUser = true;
-
-  //get all files and check if user already has a hizzacoin account
-  const bankDir = `${__dirname}/../resources/coinBank.csv`;
-  const hizzaAccounts = await csv().fromFile(bankDir);
-  for (const hizzaAccount of hizzaAccounts) {
-    //if user is found change values
-    if (hizzaAccount.userID === userId) {
-      newUser = false;
-      try {
-        //calculate new balance check if it is valid
-        if (0 > parseFloat(hizzaAccount.amount) + amount)
-          return false;
-
-        //set new balance
-        if(commitTransaction){
-          hizzaAccount.amount = parseFloat(hizzaAccount.amount) + amount;
-
-          //save balance and other information
-          const csvToSave = new Parser({ fields: ["userID", "amount", "date", "streak"] }).parse(hizzaAccounts);
-          fs.writeFileSync(bankDir, csvToSave);
-        }
-        return true;
-      } catch (err) {
-        console.error(err);
-      }
-    }
-  }
-  if (newUser === true) {
-    //user doesnt have a HizzaCoin account. They can use 'coin claim' in a server with me to get some
-    return false;
-  }
-  //hizza coin changes successful
-  return true;
-}
-
 function sendMessage(id: string, msg: string) {
   client.users.fetch(id).then((user) => {
     user.send(msg)
   })
-}
-
-async function coinTransaction(userFrom: string, userTo: string, amount: number) {
-  let hasEnough = await addHizzaCoin(userFrom, -amount, true);
-  if (hasEnough === true) {
-    if (await addHizzaCoin(userTo, amount, true) === true)
-      return true;
-    else {
-      await addHizzaCoin(userFrom, amount, true)
-      sendMessage(userFrom, "You have been refunded as the person you sent money to does not have a HizzaCoin Account 😥")
-      return false;
-    }
-  }
-  return false;
 }
 
 client.login(token);

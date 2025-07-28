@@ -46,6 +46,10 @@ public class CoinCommandsController
     public async Task<ActionResult<Challenge?>> RespondChallenge(string discordId, string challengeId, Hand hand) =>
         await _coinCommandsService.RespondChallenge(discordId, challengeId, hand);
     
+    [HttpGet("cancel-challenge")]
+    public async Task<ActionResult<bool>> CancelChallenge(string challengeId) =>
+        await _coinCommandsService.CancelChallenge(challengeId);
+    
     [HttpGet("roulette-number")]
 
     public async Task<ActionResult<RouletteResponse?>> RouletteNumber(string discordId, int numberBet, int bet) =>

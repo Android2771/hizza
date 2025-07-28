@@ -27,6 +27,15 @@ public class ChallengesService
     
     public async Task UpdateAsync(string id, Challenge updatedChallenge) =>
         await _challengesCollection.ReplaceOneAsync(challenge => challenge.Id == id, updatedChallenge);
+
+    public async Task CancelAllChallenges() =>
+        await _challengesCollection.UpdateManyAsync(c => c.State == ChallengeState.InProgress,
+            Builders<Challenge>.Update.Set(c => c.State, ChallengeState.Expired));
+    public async Task CancelChallengesByDiscordId(string discordId) =>
+        await _challengesCollection.UpdateManyAsync(c => c.ChallengerDiscordId == discordId
+                                                    || c.ChallengedDiscordId == discordId, 
+                                                    Builders<Challenge>.Update.Set(c => c.State, ChallengeState.Expired));
+
     
     public async Task RemoveAsync(string id) =>
         await _challengesCollection.DeleteOneAsync(challenge => challenge.Id == id);

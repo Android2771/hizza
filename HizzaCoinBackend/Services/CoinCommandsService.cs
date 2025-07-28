@@ -105,6 +105,7 @@ public class CoinCommandsService
         var account = await _accountsService.GetAsyncByDiscordId(discordId);
         if (account == null)
             return null;
+        
         return new CoinBalanceResponse(account.Balance, await GetWageredBalance(account));
     }
 
@@ -178,8 +179,8 @@ public class CoinCommandsService
         var challengedAccount = await _accountsService.GetAsyncByDiscordId(challengedDiscordId);
         if (challengerAccount?.Id == null
             || challengedAccount?.Id == null
-            || await GetWageredBalance(challengerAccount) < wager
-            || await GetWageredBalance(challengedAccount) < wager
+            || await GetEffectiveBalance(challengerAccount) < wager
+            || await GetEffectiveBalance(challengedAccount) < wager
             || challengedAccount.Id == challengerAccount.Id)
             return null;
 
@@ -189,11 +190,11 @@ public class CoinCommandsService
             DateTime.Now,
             Hand.NotSelected,
             Hand.NotSelected,
-            ChallengeState.Draw);
+            ChallengeState.InProgress);
 
         await _challengesService.CreateAsync(challenge);
 
-        Task.Factory.StartNew(() => { Task.Delay(1800000).ContinueWith(t => HandleOldChallenge(challenge.Id)); });
+        Task.Factory.StartNew(() => { Task.Delay(1800000).ContinueWith(t => CancelChallenge(challenge.Id)); });
 
         return challenge;
     }
@@ -201,7 +202,7 @@ public class CoinCommandsService
     public async Task<Challenge?> RespondChallenge(string discordId, string wagerId, Hand hand)
     {
         var challenge = await _challengesService.GetAsync(wagerId);
-        if (challenge == null || challenge.State != ChallengeState.InProgress)
+        if (challenge is not {State: ChallengeState.InProgress})
             return null;
 
         if (challenge.State == ChallengeState.InProgress)
@@ -216,7 +217,7 @@ public class CoinCommandsService
                 //If challenged responds, take bet amount
                 challenge.ChallengedHand = hand;
                 var challengedAccount = await _accountsService.GetAsyncByDiscordId(discordId);
-                if (challengedAccount == null || await GetWageredBalance(challengedAccount) < challenge.Wager)
+                if (challengedAccount == null || await GetEffectiveBalance(challengedAccount) < challenge.Wager)
                     return null;
             }
         }
@@ -261,8 +262,8 @@ public class CoinCommandsService
 
             challenge.State = challengeState;
 
-            await _accountsService.GetAsyncByDiscordId(challenge.ChallengerDiscordId);
-            await _accountsService.GetAsyncByDiscordId(challenge.ChallengedDiscordId);
+            await _accountsService.UpdateAsync(challengerAccount.Id, challengerAccount);
+            await _accountsService.UpdateAsync(challengedAccount.Id, challengedAccount);
 
             await _transactionsService.CreateAsync(transaction);
         }
@@ -271,7 +272,7 @@ public class CoinCommandsService
         return challenge;
     }
 
-    private async Task<bool> HandleOldChallenge(string challengeId)
+    public async Task<bool> CancelChallenge(string challengeId)
     {
         var challenge = await _challengesService.GetAsync(challengeId);
         if (challenge is not { State: ChallengeState.InProgress })
@@ -373,12 +374,15 @@ public class CoinCommandsService
         return Math.Round(randomValue, 2);
     }
 
+    private async Task<int> GetEffectiveBalance(Account account) =>
+        account.Balance - await GetWageredBalance(account);
+    
     private async Task<int> GetWageredBalance(Account account)
     {
-        var challenges = await _challengesService.GetAsyncByDiscordId(account.DiscordId);
+        var challenges = await _challengesService.GetAsync();
         var totalBetAmount = challenges
-            .Where(o => o.ChallengerDiscordId == account.DiscordId 
-                        && o.State == ChallengeState.InProgress)
+            .Where(o => account.DiscordId == o.ChallengerDiscordId || account.DiscordId == o.ChallengedDiscordId)
+            .Where(o => o.State == ChallengeState.InProgress)
             .Sum(o => o.Wager);
 
         return totalBetAmount;

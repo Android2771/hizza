@@ -60,6 +60,33 @@ interface RouletteResponse {
   Payout : number;
 }
 
+export enum ChallengeState {
+  InProgress = 0,
+  PlayerOneWin = 1,
+  PlayerTwoWin = 2,
+  Draw = 3,
+  Expired = 4
+}
+
+export enum Hand {
+  NotSelected = 0,
+  Rock = 1,
+  Paper = 2,
+  Scissors = 3
+}
+
+export interface Challenge {
+  id?: string;
+  ChallengerDiscordId: string;
+  ChallengedDiscordId: string;
+  Wager: number;
+  Date: string; // ISO 8601 date string
+  ChallengerHand: Hand;
+  ChallengedHand: Hand;
+  State: ChallengeState;
+}
+
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const token = process.env["DISCORD_BOT_TOKEN"];
@@ -589,8 +616,7 @@ export async function coinBalance(interaction: ChatInputCommandInteraction) {
       responseText += `You have \`${response.Balance}\` HizzaCoin 🪙`;
 
     if(response.WageredBalance > 0)
-      responseText += ` (\`${response.WageredBalance}\` of which has been wagered)`
-    responseText = `${interaction.options!.get('person') ? '<@'+interaction.options!.get('person')!.user!.id! + '> has' : 'You have'} \`${response.Balance}\` HizzaCoin 🪙`;
+      responseText += `  (\`${response.WageredBalance}\` of which is reserved)`
 
     await interaction.reply(responseText);
   }
@@ -599,7 +625,6 @@ export async function coinBalance(interaction: ChatInputCommandInteraction) {
 export async function coinLeaderboard(interaction: ChatInputCommandInteraction) {
   if(interaction){  
     const response : Account[] = await (await fetch(`http://localhost:8080/api/coin-commands/coin-leaderboard`)).json();
-    console.log(response);
     await interaction.deferReply();
     
     let leaderboardText = "**...................  LeaderBoard  ....................**\n";
@@ -652,13 +677,10 @@ export async function coinGive(interaction: ChatInputCommandInteraction | undefi
   }
 }
 export async function challenge(interaction: ChatInputCommandInteraction) {
-  if(interaction){
-    const challengeId = uuidv4();
-    const emotes : {[key: string] : string} = {"rock": "🪨", "paper": "📰", "scissors": "✂️"};
-    
+  if(interaction){    
     //Challenge initiated logic
     const opponent = interaction.options.get('opponent');
-    
+
     if(opponent!.user!.id === botId){
       await interaction.reply({
         content: `You cannot challenge me!`,
@@ -668,56 +690,118 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
       return;
     }
 
+    await interaction.deferReply();
+
     let wager : number | null = interaction.options!.get('wager') ? parseInt((interaction.options!.get('wager')!.value)!.toString()) : 0;
 
-    const response = await (await fetch(`http://localhost:8080/api/coin-commands/initiate-challenge?challengerDiscordId=${interaction.user.id}&challengedDiscordId=${opponent!.user!.id}&wager=${wager}`)).json();  
-
-    if(response){
+    const initiateResponse = await (await fetch(`http://localhost:8080/api/coin-commands/initiate-challenge?challengerDiscordId=${interaction.user.id}&challengedDiscordId=${opponent!.user!.id}&wager=${wager}`)).json();  
+    const emotes = ["🪨", "📰", "✂️", "🚫"]
+    if(initiateResponse){
         const rock = new ButtonBuilder()
-        .setCustomId(`rock:${challengeId}`)
+        .setCustomId(`1:${initiateResponse.Id}`)
         .setLabel('Rock')
         .setStyle(ButtonStyle.Primary)
-        .setEmoji('🪨');
+        .setEmoji(emotes[0]);
 
         const paper = new ButtonBuilder()
-        .setCustomId(`paper:${challengeId}`)
+        .setCustomId(`2:${initiateResponse.Id}`)
         .setLabel('Paper')
         .setStyle(ButtonStyle.Primary)
-        .setEmoji('📰');
+        .setEmoji(emotes[1]);
 
         const scissors = new ButtonBuilder()
-        .setCustomId(`scissors:${challengeId}`)
+        .setCustomId(`3:${initiateResponse.Id}`)
         .setLabel('Scissors')
         .setStyle(ButtonStyle.Primary)
-        .setEmoji('✂️');
+        .setEmoji(emotes[2]);
+
+        const decline = new ButtonBuilder()
+        .setCustomId(`4:${initiateResponse.Id}`)
+        .setLabel('Decline')
+        .setStyle(ButtonStyle.Danger)
+        .setEmoji(emotes[3]);
 
         const responseRow : any = new ActionRowBuilder()
-        .addComponents(rock, paper, scissors);
+        .addComponents(rock, paper, scissors, decline);
 
-        await interaction.reply({
+        await interaction.editReply({
           content: `${wager ? '🪙🪙🪙' : ''} <@${opponent!.user!.id}> has been challenged by <@${interaction.user.id}>` + (wager ? ` with a **${wager} HizzaCoin wager** 🪙🪙🪙!` : `!`),
           components: [responseRow],
-          ephemeral: false
         });
 
         const timeout = 900000;
         const buttonCollector = interaction.channel!.createMessageComponentCollector({ time: timeout });
-        
-        let answers : {[key: string] : string} = {};
 
         buttonCollector.on('collect', async (buttonInteraction : ButtonInteraction) => {
-          if(buttonInteraction.customId.split(':')[1] !== challengeId)
+          if(buttonInteraction.customId.split(':')[1] !== initiateResponse.Id)
             return;
 
-          const interactor = buttonInteraction.user.id;
+          const checkChallenge = await fetch(`http://localhost:8080/api/challenges/${initiateResponse.Id}`);
+          if(checkChallenge.status === 404){
+            await buttonInteraction.reply({content: "The challenge does not exist", ephemeral: true})
+            return;
+          }else if(checkChallenge.status === 200){
+            const checkChallengeJson : Challenge = await checkChallenge.json();
+            if(checkChallengeJson.State === ChallengeState.Expired){
+              await buttonInteraction.reply({content: "This challenge has expired", ephemeral: true});
+              return;
+            }
+          }
 
-          if(answers[interactor]){
-            await buttonInteraction.reply({
-              content: `You already chose your hand!`,
-              ephemeral: true
-            });
+          if(parseInt(buttonInteraction.customId.split(":")[0]) === 4){
+            const cancel : boolean = await (await (await fetch(`http://localhost:8080/api/coin-commands/cancel-challenge?challengeId=${initiateResponse.Id}`))).json();
+            await buttonInteraction.reply(`<@${buttonInteraction.user.id}> has cancelled the challenge!`);
             return;
           }
+
+          const challengeRequest = await fetch(`http://localhost:8080/api/coin-commands/respond-challenge?discordId=${buttonInteraction.user.id}&challengeId=${initiateResponse.Id}&hand=${buttonInteraction.customId.split(':')[0]}`);  
+
+          let challenge : Challenge;
+          if(challengeRequest.status === 200){
+            challenge = await challengeRequest.json()
+          }else{
+            await buttonInteraction.reply("You cannot create this challenge. Do you have enough HizzaCoin?")
+            return;
+          }
+
+          let winMsg = "";
+          switch(challenge.State){
+            case ChallengeState.InProgress:
+              let hand = Hand.NotSelected;
+              if(challenge.ChallengerDiscordId === buttonInteraction.user.id)
+                hand = challenge.ChallengerHand;
+              else if(challenge.ChallengedDiscordId === buttonInteraction.user.id)
+                hand = challenge.ChallengedHand
+              await buttonInteraction.reply({
+                content: `You chose your hand as  ${emotes[hand - 1]}!`,
+                ephemeral: true
+              })
+            break;
+            case ChallengeState.PlayerOneWin:
+              winMsg = `<@${challenge.ChallengerDiscordId}> ${emotes[challenge.ChallengerHand - 1]} beat <@${challenge.ChallengedDiscordId}> ${emotes[challenge.ChallengedHand - 1]}!`
+              if(wager){
+                winMsg = winMsg + `\n And has won ${wager} HizzaCoin! 🪙`      
+              }
+
+              await buttonInteraction.reply(winMsg);
+            break;
+            case ChallengeState.PlayerTwoWin:
+              winMsg = `<@${challenge.ChallengedDiscordId}> ${emotes[challenge.ChallengedHand - 1]} beat <@${challenge.ChallengerDiscordId}> ${emotes[challenge.ChallengerHand - 1]}!`
+              if(wager){
+                winMsg = winMsg + `\n And has won ${wager} HizzaCoin! 🪙`      
+              }
+
+              await buttonInteraction.reply(winMsg);
+            break;
+            case ChallengeState.Draw:
+              await buttonInteraction.reply(`<@${challenge.ChallengerDiscordId}> ${emotes[challenge.ChallengerHand - 1]} tied with <@${challenge.ChallengedDiscordId}> ${emotes[challenge.ChallengedHand - 1]}!`)
+            break;
+            case ChallengeState.Expired:
+              await buttonInteraction.reply("The challenge has expired!")
+            break;
+            default:
+              await buttonInteraction.reply("Something went wrong!")              
+          }          
         });
       }               
     }    

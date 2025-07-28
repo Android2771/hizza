@@ -38,6 +38,13 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var challengesService = app.Services.GetRequiredService<ChallengesService>();
+    await challengesService.CancelAllChallenges();
+    var challenges = await challengesService.GetAsync();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseOpenApi(config =>

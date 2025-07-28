@@ -76,7 +76,7 @@ export enum Hand {
 }
 
 export interface Challenge {
-  id?: string;
+  Id?: string;
   ChallengerDiscordId: string;
   ChallengedDiscordId: string;
   Wager: number;
@@ -690,11 +690,18 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
       return;
     }
 
-    await interaction.deferReply();
-
     let wager : number | null = interaction.options!.get('wager') ? parseInt((interaction.options!.get('wager')!.value)!.toString()) : 0;
 
-    const initiateResponse = await (await fetch(`http://localhost:8080/api/coin-commands/initiate-challenge?challengerDiscordId=${interaction.user.id}&challengedDiscordId=${opponent!.user!.id}&wager=${wager}`)).json();  
+    let initiateResponseRaw = await fetch(`http://localhost:8080/api/coin-commands/initiate-challenge?challengerDiscordId=${interaction.user.id}&challengedDiscordId=${opponent!.user!.id}&wager=${wager}`);
+    let initiateResponse : Challenge;
+    if(initiateResponseRaw.status !== 200){
+      await interaction.reply("You cannot create this challenge. Do you have enough HizzaCoin?")
+      return;
+    }else{
+      initiateResponse = await initiateResponseRaw.json();
+      console.log(initiateResponse);
+    }
+  
     const emotes = ["🪨", "📰", "✂️", "🚫"]
     if(initiateResponse){
         const rock = new ButtonBuilder()
@@ -724,7 +731,7 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
         const responseRow : any = new ActionRowBuilder()
         .addComponents(rock, paper, scissors, decline);
 
-        await interaction.editReply({
+        await interaction.reply({
           content: `${wager ? '🪙🪙🪙' : ''} <@${opponent!.user!.id}> has been challenged by <@${interaction.user.id}>` + (wager ? ` with a **${wager} HizzaCoin wager** 🪙🪙🪙!` : `!`),
           components: [responseRow],
         });
@@ -737,10 +744,10 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
             return;
 
           const checkChallenge = await fetch(`http://localhost:8080/api/challenges/${initiateResponse.Id}`);
-          if(checkChallenge.status === 404){
+          if(checkChallenge.status !== 200){
             await buttonInteraction.reply({content: "The challenge does not exist", ephemeral: true})
             return;
-          }else if(checkChallenge.status === 200){
+          }else{
             const checkChallengeJson : Challenge = await checkChallenge.json();
             if(checkChallengeJson.State === ChallengeState.Expired){
               await buttonInteraction.reply({content: "This challenge has expired", ephemeral: true});
@@ -760,7 +767,7 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
           if(challengeRequest.status === 200){
             challenge = await challengeRequest.json()
           }else{
-            await buttonInteraction.reply("You cannot create this challenge. Do you have enough HizzaCoin?")
+            await buttonInteraction.reply({content: "You cannot respond to this challenge. Do you have enough HizzaCoin?", ephemeral: true})
             return;
           }
 

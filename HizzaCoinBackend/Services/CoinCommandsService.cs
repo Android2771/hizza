@@ -48,7 +48,7 @@ public class CoinCommandsService
 
         //Calculate total base claim with streak
         var baseClaim = GetBaseClaim();
-        account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) ? account.Streak + 1 : 0;
+        account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-2) ? account.Streak + 1 : 0;
 
         var totalClaim = baseClaim + Math.Min(account.Streak, 10);
 
@@ -217,7 +217,7 @@ public class CoinCommandsService
                 //If challenged responds, take bet amount
                 challenge.ChallengedHand = hand;
                 var challengedAccount = await _accountsService.GetAsyncByDiscordId(discordId);
-                if (challengedAccount == null || await GetEffectiveBalance(challengedAccount) < challenge.Wager)
+                if (challengedAccount == null)
                     return null;
             }
         }

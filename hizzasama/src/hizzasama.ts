@@ -756,8 +756,13 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
           }
 
           if(parseInt(buttonInteraction.customId.split(":")[0]) === 4){
-            const cancel : boolean = await (await (await fetch(`http://localhost:8080/api/coin-commands/cancel-challenge?challengeId=${initiateResponse.Id}`))).json();
-            await buttonInteraction.reply(`<@${buttonInteraction.user.id}> has cancelled the challenge!`);
+            if(buttonInteraction.user.id === interaction.user.id || buttonInteraction.user.id === opponent!.user!.id){
+               const cancel : boolean = await (await (await fetch(`http://localhost:8080/api/coin-commands/cancel-challenge?challengeId=${initiateResponse.Id}`))).json();
+               await buttonInteraction.reply(`<@${buttonInteraction.user.id}> has cancelled the challenge!`);
+            }else{
+               await buttonInteraction.reply({content: "You cannot cancel this challenge!", ephemeral: true})
+            }
+
             return;
           }
 

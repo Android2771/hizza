@@ -75,7 +75,7 @@ public class CoinCommandsService
         Transaction transaction = new Transaction(
             "0",
             discordId,
-            baseClaim,
+            totalClaim,
             DateTime.Now,
             TransactionType.Claim
         );

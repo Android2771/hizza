@@ -595,9 +595,9 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
       if(response.ClaimedReward.RewardedAmount > 0)
         responseText += `\`+${response.ClaimedReward.RewardedAmount}\` Reward for \`${response.ClaimedReward.Streak}\` Streak\n`;
       if(response.Multiplier > 1)
-        responseText += `\`x${response.Multiplier}\` MULTIPLIER! 🪙🪙🪙\n\n`;
-
-      responseText += `TOTAL COIN CLAIMED: \`${response.TotalClaim}\` 🪙\n`
+        responseText += `\`x${response.Multiplier}\` MULTIPLIER! 🪙🪙n\n`;
+      
+      responseText += `\n**TOTAL COIN CLAIMED:** \`${response.TotalClaim}\` 🪙\n`
       if(response.NextReward)
         responseText += `Next Reward is in \`${response.NextReward.Streak - response.Streak}\` days!   (Streak Progress: \`${response.Streak}\`/\`${response.NextReward.Streak}\`)\n`;
     }
@@ -695,7 +695,7 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
     let initiateResponseRaw = await fetch(`http://localhost:8080/api/coin-commands/initiate-challenge?challengerDiscordId=${interaction.user.id}&challengedDiscordId=${opponent!.user!.id}&wager=${wager}`);
     let initiateResponse : Challenge;
     if(initiateResponseRaw.status !== 200){
-      await interaction.reply("You cannot create this challenge. Do you have enough HizzaCoin?")
+      await interaction.reply({content: "You cannot create this challenge. Do you both have enough HizzaCoin?", ephemeral: true})
       return;
     }else{
       initiateResponse = await initiateResponseRaw.json();

@@ -11,14 +11,16 @@ public class CoinCommandsService
     private readonly TransactionsService _transactionsService;
     private readonly RewardsService _rewardsService;
     private readonly ChallengesService _challengesService;
+    private readonly RouletteService _rouletteService;
 
     public CoinCommandsService(AccountsService accountsService, TransactionsService transactionsService,
-        RewardsService rewardsService, ChallengesService challengesService)
+        RewardsService rewardsService, ChallengesService challengesService, RouletteService rouletteService)
     {
         _accountsService = accountsService;
         _transactionsService = transactionsService;
         _rewardsService = rewardsService;
         _challengesService = challengesService;
+        _rouletteService = rouletteService;
     }
 
     public async Task<CoinClaimResponse?> CoinClaim(string discordId)
@@ -292,9 +294,13 @@ public class CoinCommandsService
 
         if (numberBet == rouletteNumber)
         {
-            if(await PayOutSpoils(discordId, spoils))
+            if (await PayOutSpoils(discordId, spoils))
+            {
+                await _rouletteService.CreateAsync(new Roulette(bet, spoils, numberBet, rouletteNumber, 1));
                 return new RouletteResponse(rouletteNumber, bet, spoils);
+            }
 
+            await _rouletteService.CreateAsync(new Roulette(bet, 0, numberBet, rouletteNumber, 1));
             return new RouletteResponse(0, 0, 0);
         }
 
@@ -314,8 +320,12 @@ public class CoinCommandsService
                 (twelveBet == 3 && rouletteNumber is >= 25 and <= 36))
         {
             if (await PayOutSpoils(discordId, bet * 3))
+            {
+                await _rouletteService.CreateAsync(new Roulette(bet, spoils, twelveBet, rouletteNumber, 2));
                 return new RouletteResponse(rouletteNumber, bet, spoils);
-            
+            }
+
+            await _rouletteService.CreateAsync(new Roulette(bet, 0, twelveBet, rouletteNumber, 2));
             return new RouletteResponse(0, 0, 0);
         }
 
@@ -333,8 +343,11 @@ public class CoinCommandsService
         int[] redColours = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 13, 25, 27, 30, 32, 34, 36];
         if (rouletteNumber != 0 && (isColourRedBet && redColours.Contains(rouletteNumber) || !isColourRedBet && !redColours.Contains(rouletteNumber)))
         {
-            if(await PayOutSpoils(discordId, bet * 2))
+            if (await PayOutSpoils(discordId, bet * 2))
+            {
+                
                 return new RouletteResponse(rouletteNumber, bet, spoils);
+            }
 
             return new RouletteResponse(0, 0, 0);
         }

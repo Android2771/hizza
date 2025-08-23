@@ -36,7 +36,7 @@ public class CoinCommandsController : ControllerBase
         await _coinCommandsService.CoinEconomy(discordId);
 
     [HttpGet("coin-give")]
-    public async Task<ActionResult<bool>> CoinGive(string senderDiscordId, string receiverDiscordId, int amountToSend)
+    public async Task<ActionResult<bool>> CoinGive(string senderDiscordId, string receiverDiscordId, long amountToSend)
     {
         var give = await _coinCommandsService.CoinGive(senderDiscordId, receiverDiscordId, amountToSend, false);
         if (give)
@@ -48,7 +48,7 @@ public class CoinCommandsController : ControllerBase
     }
 
     [HttpGet("initiate-challenge")]
-    public async Task<ActionResult<Challenge>> InitiateChallenge(string challengerDiscordId, string challengedDiscordId, int wager)
+    public async Task<ActionResult<Challenge>> InitiateChallenge(string challengerDiscordId, string challengedDiscordId, long wager)
     {
         var challenge = await _coinCommandsService.InitiateChallenge(challengerDiscordId, challengedDiscordId, wager);
         if (challenge == null)
@@ -78,16 +78,16 @@ public class CoinCommandsController : ControllerBase
     
     [HttpGet("roulette-number")]
 
-    public async Task<ActionResult<RouletteResponse?>> RouletteNumber(string discordId, int numberBet, int bet) =>
+    public async Task<ActionResult<RouletteResponse?>> RouletteNumber(string discordId, long numberBet, long bet) =>
         await _coinCommandsService.RouletteNumber(discordId, numberBet, bet);
     
     [HttpGet("roulette-twelve")]
 
-    public async Task<ActionResult<RouletteResponse?>> RouletteTwelve(string discordId, int twelveBet, int bet) =>
+    public async Task<ActionResult<RouletteResponse?>> RouletteTwelve(string discordId, long twelveBet, long bet) =>
         await _coinCommandsService.RouletteTwelve(discordId, twelveBet, bet);
     
     [HttpGet("roulette-colour")]
 
-    public async Task<ActionResult<RouletteResponse?>> RouletteColour(string discordId, bool isColourRedBet, int bet) =>
+    public async Task<ActionResult<RouletteResponse?>> RouletteColour(string discordId, bool isColourRedBet, long bet) =>
         await _coinCommandsService.RouletteColour(discordId, isColourRedBet, bet);
 }

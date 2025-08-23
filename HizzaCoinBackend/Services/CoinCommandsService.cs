@@ -135,7 +135,7 @@ public class CoinCommandsService
         return null;
     }
 
-    public async Task<bool> CoinGive(string senderDiscordId, string receiverDiscordId, int amountToSend, bool isBet)
+    public async Task<bool> CoinGive(string senderDiscordId, string receiverDiscordId, long amountToSend, bool isBet)
     {
         if (amountToSend <= 0)
             return false;
@@ -169,7 +169,7 @@ public class CoinCommandsService
         return true;
     }
 
-    public async Task<Challenge?> InitiateChallenge(string challengerDiscordId, string challengedDiscordId, int wager)
+    public async Task<Challenge?> InitiateChallenge(string challengerDiscordId, string challengedDiscordId, long wager)
     {
         if (wager < 0)
             return null;
@@ -282,7 +282,7 @@ public class CoinCommandsService
         return true;
     }
 
-    public async Task<RouletteResponse?> RouletteNumber(string discordId, int numberBet, int bet)
+    public async Task<RouletteResponse?> RouletteNumber(string discordId, long numberBet, long bet)
     {
         var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);
         var spoils = bet * 35;
@@ -301,7 +301,7 @@ public class CoinCommandsService
         return new RouletteResponse(rouletteNumber, bet, 0);
     }
 
-    public async Task<RouletteResponse?> RouletteTwelve(string discordId, int twelveBet, int bet)
+    public async Task<RouletteResponse?> RouletteTwelve(string discordId, long twelveBet, long bet)
     {
         var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);
         var spoils = bet * 3;
@@ -322,7 +322,7 @@ public class CoinCommandsService
         return new RouletteResponse(rouletteNumber, bet, 0);
     }
 
-    public async Task<RouletteResponse?> RouletteColour(string discordId, bool isColourRedBet, int bet)
+    public async Task<RouletteResponse?> RouletteColour(string discordId, bool isColourRedBet, long bet)
     {
         var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);
         var spoils = bet * 2;
@@ -343,16 +343,16 @@ public class CoinCommandsService
     }
 
 
-    private async Task<bool> TakeBet(string discordId, int bet) =>
+    private async Task<bool> TakeBet(string discordId, long bet) =>
         await CoinGive(discordId, "0", bet, true);
 
-    private async Task<bool> PayOutSpoils(string discordId, int spoils) =>
+    private async Task<bool> PayOutSpoils(string discordId, long spoils) =>
         await CoinGive("0", discordId, spoils, true);
 
-    private int GetBaseClaim()
+    private long GetBaseClaim()
     {
         DateTime date = DateTime.Now;
-        int seed = date.Day + date.Month;
+        long seed = date.Day + date.Month;
 
         if (seed % 3 == 0 || seed % 5 == 0)
             return 5;
@@ -373,10 +373,10 @@ public class CoinCommandsService
         return Math.Round(randomValue, 2);
     }
 
-    private async Task<int> GetEffectiveBalance(Account account) =>
+    private async Task<long> GetEffectiveBalance(Account account) =>
         account.Balance - await GetWageredBalance(account);
     
-    private async Task<int> GetWageredBalance(Account account)
+    private async Task<long> GetWageredBalance(Account account)
     {
         var challenges = await _challengesService.GetAsync();
         var totalBetAmount = challenges

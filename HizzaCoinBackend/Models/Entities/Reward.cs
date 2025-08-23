@@ -12,10 +12,10 @@ public class Reward
 
     [BsonElement("Streak")]
     [JsonPropertyName("Streak")]
-    public int Streak { get; set; }
+    public long Streak { get; set; }
     
     [BsonElement("RewardedAmount")]
     [JsonPropertyName("RewardedAmount")]
-    public int RewardedAmount { get; set; }
+    public long RewardedAmount { get; set; }
     
 }

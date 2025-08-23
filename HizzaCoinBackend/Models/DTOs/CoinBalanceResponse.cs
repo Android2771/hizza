@@ -2,12 +2,12 @@
 
 public class CoinBalanceResponse
 {
-    public CoinBalanceResponse(int balance, int wageredBalance)
+    public CoinBalanceResponse(long balance, long wageredBalance)
     {
         Balance = balance;
         WageredBalance = wageredBalance;
     }
 
-    public int Balance { get; set; }
-    public int WageredBalance { get; set; }
+    public long Balance { get; set; }
+    public long WageredBalance { get; set; }
 }

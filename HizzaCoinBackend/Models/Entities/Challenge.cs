@@ -10,7 +10,7 @@ public class Challenge
     {
     }
 
-    public Challenge(string challengerDiscordId, string challengedDiscordId, int wager, DateTime date, Hand challengerHand, Hand challengedHand, ChallengeState state)
+    public Challenge(string challengerDiscordId, string challengedDiscordId, long wager, DateTime date, Hand challengerHand, Hand challengedHand, ChallengeState state)
     {
         ChallengerDiscordId = challengerDiscordId;
         ChallengedDiscordId = challengedDiscordId;
@@ -35,7 +35,7 @@ public class Challenge
     
     [BsonElement("Wager")]
     [JsonPropertyName("Wager")]
-    public int Wager { get; set; }
+    public long Wager { get; set; }
     
     [BsonElement("Date")]
     [JsonPropertyName("Date")]

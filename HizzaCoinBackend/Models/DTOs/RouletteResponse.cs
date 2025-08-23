@@ -2,14 +2,14 @@
 
 public class RouletteResponse
 {
-    public RouletteResponse(int rouletteNumber, int bet, int payout)
+    public RouletteResponse(long rouletteNumber, long bet, long payout)
     {
         RouletteNumber = rouletteNumber;
         Bet = bet;
         Payout = payout;
     }
 
-    public int RouletteNumber { get; set; }
-    public int Bet { get; set; }
-    public int Payout { get; set; }
+    public long RouletteNumber { get; set; }
+    public long Bet { get; set; }
+    public long Payout { get; set; }
 }

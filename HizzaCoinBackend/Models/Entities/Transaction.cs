@@ -10,7 +10,7 @@ public class Transaction
     {
     }
 
-    public Transaction(string senderDiscordId, string receiverDiscordId, int amount, DateTime date, TransactionType transactionType)
+    public Transaction(string senderDiscordId, string receiverDiscordId, long amount, DateTime date, TransactionType transactionType)
     {
         SenderDiscordId = senderDiscordId;
         ReceiverDiscordId = receiverDiscordId;
@@ -33,7 +33,7 @@ public class Transaction
     
     [BsonElement("Amount")]
     [JsonPropertyName("Amount")]
-    public int Amount { get; set; }
+    public long Amount { get; set; }
     
     [BsonElement("Date")]
     [JsonPropertyName("Date")]

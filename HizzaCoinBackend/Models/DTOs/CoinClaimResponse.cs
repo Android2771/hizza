@@ -2,7 +2,7 @@
 
 public class CoinClaimResponse
 {
-    public CoinClaimResponse(string discordId, int baseClaim, int streak, double multiplier, Reward claimedReward, Reward nextReward, int totalClaim, bool claimed)
+    public CoinClaimResponse(string discordId, long baseClaim, long streak, double multiplier, Reward claimedReward, Reward nextReward, long totalClaim, bool claimed)
     {
         DiscordId = discordId;
         BaseClaim = baseClaim;
@@ -15,12 +15,12 @@ public class CoinClaimResponse
     }
 
     public string DiscordId { get; set; }
-    public int BaseClaim { get; set; }
-    public int Streak { get; set; }
+    public long BaseClaim { get; set; }
+    public long Streak { get; set; }
     public double Multiplier { get; set; }
     public Reward ClaimedReward { get; set; }
     public Reward NextReward { get; set; }
-    public int TotalClaim { get; set; }
+    public long TotalClaim { get; set; }
 
     public bool Claimed { get; set; }
 }

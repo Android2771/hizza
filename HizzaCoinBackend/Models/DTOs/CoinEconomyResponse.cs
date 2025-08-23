@@ -2,7 +2,7 @@ namespace HizzaCoinBackend.Models.DTOs;
 
 public class CoinEconomyResponse
 {
-    public CoinEconomyResponse(int totalHizzaCoinAmount, int totalHizzaCoinAccounts, int leaderboardPlace, double percentageEconomy)
+    public CoinEconomyResponse(long totalHizzaCoinAmount, long totalHizzaCoinAccounts, long leaderboardPlace, double percentageEconomy)
     {
         TotalHizzaCoinAmount = totalHizzaCoinAmount;
         TotalHizzaCoinAccounts = totalHizzaCoinAccounts;
@@ -10,8 +10,8 @@ public class CoinEconomyResponse
         PercentageEconomy = percentageEconomy;
     }
 
-    public int TotalHizzaCoinAmount { get; set; }
-    public int TotalHizzaCoinAccounts { get; set; }
-    public int LeaderboardPlace { get; set; }
+    public long TotalHizzaCoinAmount { get; set; }
+    public long TotalHizzaCoinAccounts { get; set; }
+    public long LeaderboardPlace { get; set; }
     public double PercentageEconomy { get; set; }
 }

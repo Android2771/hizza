@@ -39,7 +39,7 @@ public class CoinCommandsController : ControllerBase
     public async Task<ActionResult<bool>> CoinGive(string senderDiscordId, string receiverDiscordId, long amountToSend)
     {
         var give = await _coinCommandsService.CoinGive(senderDiscordId, receiverDiscordId, amountToSend, false);
-        if (give)
+        if (give.Id != null)
         {
             return Ok(give);
         }

@@ -60,7 +60,7 @@ public class CoinCommandsService
         {
             claimedReward = nextReward;
             nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
-            totalClaim += nextReward.RewardedAmount;
+            totalClaim += claimedReward.RewardedAmount;
         }
 
         //Add Multiplier

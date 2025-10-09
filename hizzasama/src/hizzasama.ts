@@ -120,11 +120,11 @@ const gptGuilds = ["1249401431262232636", "1167198223832723476", "95474140258618
 let temperature  = 1.0;
 let max_tokens = 512;
 let chatModel = 'gpt-4-turbo';
-let imageModel = 'dall-e-3';
+let imageModel = 'dall-e-2';
 let behaviour = "";
 let top_p = 1;
 
-let coinClaimLuck = 0.15;
+let coinClaimLuck = 0.2;
 
 if (process.argv[2]) {
   const commands = [
@@ -329,7 +329,7 @@ if (process.argv[2]) {
     try {
       console.log('Started refreshing application (/) commands.');
 
-      await rest.put(Routes.applicationCommands("1076237275513487361"), { body: commands });
+      await rest.put(Routes.applicationCommands(botId), { body: commands });
 
       console.log('Successfully reloaded application (/) commands.');
     } catch (error) {
@@ -453,7 +453,7 @@ client.on("messageCreate", async (message : any) => {
           message.channel.send(`Drea and Cath have been dating for \`${((Date.now() - (new Date(2020, 1, 21).valueOf())) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
       else if (message.author.id === "183577847418322944" || message.author.id === "148455623313326080")
           message.channel.send(`Andy Pandy and Nasi Poo have been dating for \`${((Date.now() - (new Date(2021, 7, 7)).valueOf()) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
-      else if (message.author.id === "586278312809201665")
+      else if (message.author.id === "586278312809201665" || message.author.id === "196171123019218944")
 	  message.channel.send(`Anne and Chad have been dating for \`${((Date.now() - (new Date(2022, 11, 27)).valueOf()) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
       break OUTER_LOOP
     }
@@ -591,7 +591,7 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
       responseText = "You have already claimed your coin!";
     else{
       if(response.Streak > 0)
-        responseText += `\`+${Math.min(response.Streak, 10)}\` Streak ${response.Streak >= 10 ? 'MAX' : ''}\n`;
+        responseText += `\`+${Math.min(response.Streak, 30)}\` Streak ${response.Streak >= 10 ? 'MAX' : ''}\n`;
       if(response.ClaimedReward.RewardedAmount > 0)
         responseText += `\`+${response.ClaimedReward.RewardedAmount}\` Reward for \`${response.ClaimedReward.Streak}\` Streak\n`;
       if(response.Multiplier > 1)

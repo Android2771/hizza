@@ -2,16 +2,11 @@
 //SYNC COMMANDS
 import { REST, Routes, Client, GatewayIntentBits, Partials, ButtonBuilder, ButtonStyle, ActionRowBuilder, ButtonInteraction, ChatInputCommandInteraction, Interaction, EmbedBuilder } from 'discord.js';
 import process from 'process';
-import { Parser } from 'json2csv';
-import csv from 'csvtojson'
-import fs from 'fs'
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import fetch from "node-fetch";
 import { Chess } from 'chess.js'
 import { execSync } from 'child_process';
-import request from 'request';
-import {v4 as uuidv4} from 'uuid';
 import 'dotenv/config';
 import OpenAI from "openai";
 import puppeteer  from 'puppeteer';
@@ -352,12 +347,6 @@ if(newPresence!.guild!.id !== "841363743957975063")
    case "offline": status = 3; break;
    default: status = -1; break;
  }
-
- fs.writeFileSync(`${__dirname}/activity.log`, Date.now() + ", " + newPresence.userId + ", " + status + "\n", {
-   encoding: "utf8",
-   flag: "a+",
-   mode: 0o666
- }); 
 })
 
 client.on("messageCreate", async (message : any) => {

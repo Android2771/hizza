@@ -49,7 +49,7 @@ public class CoinCommandsService
         }
 
         //Calculate total base claim with streak
-        var baseClaim = GetBaseClaim();
+        var baseClaim = GetBaseClaim() * 3;
         var nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
         account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) || account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-2) ? account.Streak + 1 : 0;
         var totalClaim = baseClaim + Math.Min(account.Streak, 30);
@@ -64,8 +64,7 @@ public class CoinCommandsService
         }
 
         //Add Multiplier
-        Random random = new Random();
-        var addMultiplier = random.Next(0, 100) < 13;
+        var addMultiplier = RandomNumberGenerator.GetInt32(0, 5) == 0;
         var multiplier = addMultiplier ? GetMultiplier() : 1;
         totalClaim = (int)(totalClaim * multiplier);
 

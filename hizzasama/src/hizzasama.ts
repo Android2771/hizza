@@ -124,8 +124,6 @@ let imageModel = 'dall-e-2';
 let behaviour = "";
 let top_p = 1;
 
-let coinClaimLuck = 0.2;
-
 if (process.argv[2]) {
   const commands = [
     {
@@ -595,7 +593,7 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
       if(response.ClaimedReward.RewardedAmount > 0)
         responseText += `\`+${response.ClaimedReward.RewardedAmount}\` Reward for \`${response.ClaimedReward.Streak}\` Streak\n`;
       if(response.Multiplier > 1)
-        responseText += `\`x${response.Multiplier}\` MULTIPLIER! 🪙🪙n\n`;
+        responseText += `\`x${response.Multiplier}\` MULTIPLIER! 🪙🪙\n`;
       
       responseText += `\n**TOTAL COIN CLAIMED:** \`${response.TotalClaim}\` 🪙\n`
       if(response.NextReward)
@@ -970,7 +968,7 @@ export async function rouletteNumber(interaction: ChatInputCommandInteraction) {
   if(interaction){
     const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-number?discordId=${interaction.user.id}&numberBet=${interaction.options!.get('number')!.value!}&bet=${interaction.options!.get('wager')!.value!}`)).json();
     if(response.Payout > 0){
-      await interaction.reply(`You managed to guess the number \`${response.RouletteNumber}\`! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin {Amount: 69}(x35) 🪙🪙🪙!`)
+      await interaction.reply(`You managed to guess the number \`${response.RouletteNumber}\`! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin (x35) 🪙🪙🪙!`)
     }else if(response.Bet > 0){
       await interaction.reply(`You did not manage to guess the number \`${response.RouletteNumber}\` and lost \`${response.Bet}\` HizzaCoin`)
     }else{

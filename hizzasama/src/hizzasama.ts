@@ -350,8 +350,6 @@ if(newPresence!.guild!.id !== "841363743957975063")
 })
 
 client.on("messageCreate", async (message : any) => {
-  fetch("https://andrewbuhagiar.com:8443/counter/89c63b4d-bd43-4b85-b8a5-6d0a10b18263");
-
   // If bot is saying it then ignore, bot should not execute commands
   OUTER_LOOP: {
     if (message.author.id === botId || message.author.id === '255240051573653505' || message.author.id === "341911947366891531")

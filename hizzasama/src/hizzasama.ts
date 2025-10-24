@@ -951,13 +951,13 @@ export async function destiny(interaction: ChatInputCommandInteraction) {
 export async function rouletteNumber(interaction: ChatInputCommandInteraction) {
   if(interaction){
       const takeNumberInputs = (numberInputs : string) : Set<number> => {
-        if(!/^(\d+(-\d+)?)(,(\d+(-\d+)?))*$/.test(numberInputs))
+        if(!/^(\d+([-–]+\d+)?)(,(\d+([-–]+\d+)?))*$/.test(numberInputs))
             return new Set();
 
         let allNumberInputs = new Set<number>()
 
         numberInputs.split(",").forEach(number => {
-            let dashSplitNumber = number.split("-")
+            let dashSplitNumber = number.split(/[-–]+/")
             switch(dashSplitNumber.length){
                 case 1:
                     if(parseInt(number) < 0 || parseInt(number) > 36)

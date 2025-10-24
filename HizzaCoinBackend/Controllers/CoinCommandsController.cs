@@ -1,9 +1,7 @@
 ﻿using HizzaCoinBackend.Models;
 using HizzaCoinBackend.Models.DTOs;
 using HizzaCoinBackend.Services;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson;
 
 namespace HizzaCoinBackend.Controllers;
 
@@ -78,8 +76,8 @@ public class CoinCommandsController : ControllerBase
     
     [HttpGet("roulette-number")]
 
-    public async Task<ActionResult<RouletteResponse?>> RouletteNumber(string discordId, long numberBet, long bet) =>
-        await _coinCommandsService.RouletteNumber(discordId, numberBet, bet);
+    public async Task<ActionResult<RouletteResponse?>> RouletteNumber(string discordId, string numberBets, long bet) =>
+        await _coinCommandsService.RouletteNumber(discordId, numberBets, bet);
     
     [HttpGet("roulette-twelve")]
 

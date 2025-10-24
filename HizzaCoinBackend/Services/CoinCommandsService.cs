@@ -283,22 +283,42 @@ public class CoinCommandsService
         return true;
     }
 
-    public async Task<RouletteResponse?> RouletteNumber(string discordId, long numberBet, long bet)
+    public async Task<RouletteResponse?> RouletteNumber(string discordId, string numberBets, long bet)
     {
-        var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);
-        var spoils = bet * 35;
-        
-        if(numberBet is < 0 or > 36 || (await TakeBet(discordId, bet)).Id == null)
-            return new RouletteResponse(0, 0, 0);
-
-        if (numberBet == rouletteNumber)
+        var numberBetStrings = numberBets.Split(",");
+        List<long> numberBetInts = new List<long>();
+        foreach (var numberBetString in numberBetStrings)
         {
-            if ((await PayOutSpoils(discordId, spoils)).Id != null)
-            {
-                return new RouletteResponse(rouletteNumber, bet, spoils);
-            }
+            numberBetInts.Add(Convert.ToInt64(numberBetString));
+        }
+        
+        var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);
+        var spoils = (long)(bet * Math.Round(Math.Pow((double)numberBetInts.Count / 36, -1), 2));
+        spoils = spoils < bet ? bet : spoils;
+        
+        //Validate numbers and bet
+        foreach (long numberBet in numberBetInts)
+        {
+            if (numberBet is < 0 or > 36)
+                return new RouletteResponse(0, 0, 0);
+        }
 
+        if ((await TakeBet(discordId, bet)).Id == null)
+        {
             return new RouletteResponse(0, 0, 0);
+        }
+        
+        foreach(long numberBet in numberBetInts)
+        {
+            if (numberBet == rouletteNumber)
+                {
+                    if ((await PayOutSpoils(discordId, spoils)).Id != null)
+                    {
+                        return new RouletteResponse(rouletteNumber, bet, spoils);
+                    }
+
+                    return new RouletteResponse(0, 0, 0);
+                }
         }
 
         return new RouletteResponse(rouletteNumber, bet, 0);

@@ -255,16 +255,14 @@ if (process.argv[2]) {
       ]
     },
     {
-      name: "guessnumber",
-      description: "Guess number between 0 and 36 with a chance to win x35 your HizzaCoin",
+      name: "guessnumbers",
+      description: "Guess numbers between 0 and 36 with a chance to win up to x36 your HizzaCoin",
       options: [
         {
-          name: "number",
-          description: "Which number between 0 and 36",
+          name: "numbers",
+          description: "Which numbers between 0 and 36",
           required: true,
-          type: 4,                 
-          min_value: 0,
-          max_value: 36
+          type: 3
         },
         {
           name: 'wager',
@@ -560,7 +558,7 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     case "tell":              try { await tell(interaction); }            catch (err) { console.error(err) } break;
     case "imagine":           try { await imagine(interaction); }         catch (err) { console.error(err) } break;
     case "counter":           try { await counter(interaction); }         catch (err) { console.error(err) } break;
-    case "guessnumber":    try { await rouletteNumber(interaction); }  catch (err) { console.error(err) } break;
+    case "guessnumbers":    try { await rouletteNumber(interaction); }  catch (err) { console.error(err) } break;
     case "guesscolour":    try { await rouletteColour(interaction); }  catch (err) { console.error(err) } break;
     case "guesstwelve":   try { await rouletteTwelves(interaction); } catch (err) { console.error(err) } break;
   }
@@ -953,9 +951,52 @@ export async function destiny(interaction: ChatInputCommandInteraction) {
 
 export async function rouletteNumber(interaction: ChatInputCommandInteraction) {
   if(interaction){
-    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-number?discordId=${interaction.user.id}&numberBet=${interaction.options!.get('number')!.value!}&bet=${interaction.options!.get('wager')!.value!}`)).json();
+      const takeNumberInputs = (numberInputs : string) : Set<number> => {
+        if(!/^(\d+(-\d+)?)(,(\d+(-\d+)?))*$/.test(numberInputs))
+            return new Set();
+
+        let allNumberInputs = new Set<number>()
+
+        numberInputs.split(",").forEach(number => {
+            let dashSplitNumber = number.split("-")
+            switch(dashSplitNumber.length){
+                case 1:
+                    if(parseInt(number) < 0 || parseInt(number) > 36)
+                      return new Set();
+                    allNumberInputs.add(parseInt(number));
+                break;
+                case 2:
+                    let from = parseInt(dashSplitNumber[0]);
+                    let to = parseInt(dashSplitNumber[1]);
+                    if(to >= from){
+                        for(let i = from; i <= to; i++){
+                          if(i < 0 || i > 36)
+                            return new Set();
+                            allNumberInputs.add(i)
+                        }
+                    }else{
+                        return new Set();
+                    }
+                break;
+                default:
+                    return new Set();
+            }
+        });
+
+        return allNumberInputs
+    }
+
+    const processedInput = takeNumberInputs(interaction.options!.get('numbers')!.value!.toString());
+    if(processedInput.size == 0){
+      await interaction.reply("Incorrect format! Type in numbers or ranges of numbers like this: \`0,1,2,3-6,20\`")
+      return;
+    }
+    const reward = parseFloat(((processedInput.size / 36) ** -1).toFixed(2));
+    const allNumberInputsString = [...processedInput].toString();
+    console.log(allNumberInputsString);
+    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-number?discordId=${interaction.user.id}&numberBets=${allNumberInputsString}&bet=${interaction.options!.get('wager')!.value!}`)).json();
     if(response.Payout > 0){
-      await interaction.reply(`You managed to guess the number \`${response.RouletteNumber}\`! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin (x35) 🪙🪙🪙!`)
+      await interaction.reply(`You managed to guess the number \`${response.RouletteNumber}\`! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin (\`x${reward}\`) 🪙🪙🪙!`)
     }else if(response.Bet > 0){
       await interaction.reply(`You did not manage to guess the number \`${response.RouletteNumber}\` and lost \`${response.Bet}\` HizzaCoin`)
     }else{

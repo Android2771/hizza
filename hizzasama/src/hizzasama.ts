@@ -551,23 +551,19 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     case "guesscolour":    try { await rouletteColour(interaction); }  catch (err) { console.error(err) } break;
     case "guesstwelve":   try { await rouletteTwelves(interaction); } catch (err) { console.error(err) } break;
   }
-
-  let invokerInLeaderboard = false;
-
   if(oldLeaderboard){    
     let newLeaderboard : Account[] = await (await fetch(`http://localhost:8080/api/coin-commands/coin-leaderboard`)).json();
-    for(let i = 0; i < newLeaderboard.length && i < oldLeaderboard.length; i++){      
-      if(newLeaderboard[i].DiscordId === interaction.user.id)
-        invokerInLeaderboard = true;
+    oldLeaderboard.filter(x => !newLeaderboard.includes(x)).forEach(removedFromLeaderboard => {
+      updateMedal(removedFromLeaderboard.DiscordId, 4)
+    });
+
+    for(let i = 0; i < newLeaderboard.length && i < oldLeaderboard.length; i++){  
 
       //Update medal for leaderboard place changes or if first command
       if(oldLeaderboard[i].DiscordId !== newLeaderboard[i].DiscordId || commandsExecuted === 1){
         updateMedal(newLeaderboard[i].DiscordId, i+1);
       }
     };
-
-    if(!invokerInLeaderboard)
-      updateMedal(interaction.user.id, 4)
   }
 });
 

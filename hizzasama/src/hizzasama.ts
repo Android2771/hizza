@@ -105,6 +105,7 @@ const client = new Client(
   })
 
 let chess : any;
+let commandsExecuted = 0;
 
 let chessOngoing = false;
 let player1 = '';
@@ -524,6 +525,8 @@ client.on("messageCreate", async (message : any) => {
 
 client.on('interactionCreate', async (interaction: Interaction) => {
   if (!interaction.isChatInputCommand()) return;
+
+  commandsExecuted++;
   
   let oldLeaderboard : Account[] = [];
   if(interaction.commandName.startsWith("coin") || interaction.commandName.startsWith("guess") || interaction.commandName === "challenge"){
@@ -556,8 +559,9 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     for(let i = 0; i < newLeaderboard.length && i < oldLeaderboard.length; i++){      
       if(newLeaderboard[i].DiscordId === interaction.user.id)
         invokerInLeaderboard = true;
-      
-      if(oldLeaderboard[i].DiscordId !== newLeaderboard[i].DiscordId){
+
+      //Update medal for leaderboard place changes or if first command
+      if(oldLeaderboard[i].DiscordId !== newLeaderboard[i].DiscordId || commandsExecuted === 1){
         updateMedal(newLeaderboard[i].DiscordId, i+1);
       }
     };

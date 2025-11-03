@@ -553,12 +553,15 @@ client.on('interactionCreate', async (interaction: Interaction) => {
   }
   if(oldLeaderboard){    
     let newLeaderboard : Account[] = await (await fetch(`http://localhost:8080/api/coin-commands/coin-leaderboard`)).json();
-    oldLeaderboard.filter(x => !newLeaderboard.includes(x)).forEach(removedFromLeaderboard => {
-      updateMedal(removedFromLeaderboard.DiscordId, 4)
+    const newIds = new Set(newLeaderboard.map(acc => acc.DiscordId));
+    const oldIds = new Set(oldLeaderboard.map(acc => acc.DiscordId));
+    const removedIds = [...oldIds].filter(id => !newIds.has(id));
+
+    removedIds.forEach(id => {
+      updateMedal(id, 4)
     });
 
     for(let i = 0; i < newLeaderboard.length && i < oldLeaderboard.length; i++){  
-
       //Update medal for leaderboard place changes or if first command
       if(oldLeaderboard[i].DiscordId !== newLeaderboard[i].DiscordId || commandsExecuted === 1){
         updateMedal(newLeaderboard[i].DiscordId, i+1);
@@ -624,6 +627,7 @@ export async function coinLeaderboard(interaction: ChatInputCommandInteraction) 
 }
 
 async function updateMedal(discordId : string, place : number){
+  console.log(`Updating medal for ${discordId} with place ${place}`)
   try{
     const guild = await client.guilds.fetch("841363743957975063");
     const member = await guild.members.fetch(discordId);

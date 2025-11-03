@@ -549,18 +549,20 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     case "guesstwelve":   try { await rouletteTwelves(interaction); } catch (err) { console.error(err) } break;
   }
 
-  let invokerUpdated = false;
+  let invokerInLeaderboard = false;
+
   if(oldLeaderboard){    
     let newLeaderboard : Account[] = await (await fetch(`http://localhost:8080/api/coin-commands/coin-leaderboard`)).json();
-    for(let i = 0; i < newLeaderboard.length && i < oldLeaderboard.length; i++){
+    for(let i = 0; i < newLeaderboard.length && i < oldLeaderboard.length; i++){      
+      if(newLeaderboard[i].DiscordId === interaction.user.id)
+        invokerInLeaderboard = true;
+      
       if(oldLeaderboard[i].DiscordId !== newLeaderboard[i].DiscordId){
         updateMedal(newLeaderboard[i].DiscordId, i+1);
-        if(newLeaderboard[i].DiscordId === interaction.user.id)
-          invokerUpdated = true;
       }
     };
 
-    if(!invokerUpdated)
+    if(!invokerInLeaderboard)
       updateMedal(interaction.user.id, 4)
   }
 });
@@ -629,8 +631,9 @@ async function updateMedal(discordId : string, place : number){
     if(nickname !== null)
       await member.setNickname(place < 4 ? `${nickname.split(" ")[0]} ${["🥇", "🥈", "🥉"][place - 1]}` : nickname.split(" ")[0])
     console.log(`Updated medal for ${discordId} with place ${place}`)
-  }catch{
+  }catch(error){
     console.log(`Could not update medal for ${discordId} with place ${place}`)
+    console.log(error);
     return;
   }
 }

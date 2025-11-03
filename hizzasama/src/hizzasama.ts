@@ -630,10 +630,7 @@ async function updateMedal(discordId : string, place : number){
     const nickname = member.nickname;
     if(nickname !== null)
       await member.setNickname(place < 4 ? `${nickname.split(" ")[0]} ${["🥇", "🥈", "🥉"][place - 1]}` : nickname.split(" ")[0])
-    console.log(`Updated medal for ${discordId} with place ${place}`)
   }catch(error){
-    console.log(`Could not update medal for ${discordId} with place ${place}`)
-    console.log(error);
     return;
   }
 }

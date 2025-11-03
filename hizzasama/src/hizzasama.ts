@@ -624,8 +624,9 @@ export async function coinLeaderboard(interaction: ChatInputCommandInteraction) 
 async function updateMedal(discordId : string, place : number){
   const guild = await client.guilds.fetch("841363743957975063");
   const member = await guild.members.fetch(discordId);
-  const nickname = member.nickname || member.user.username;
-  await member.setNickname(place < 4 ? `${nickname.split(" ")[0]}${["🥇", "🥈", "🥉"][place - 1]}` : nickname.split(" ")[0])
+  const nickname = member.nickname;
+  if(nickname !== null)
+    await member.setNickname(place < 4 ? `${nickname.split(" ")[0]}${["🥇", "🥈", "🥉"][place - 1]}` : nickname.split(" ")[0])
 }
 
 export async function coinEconomy(interaction: ChatInputCommandInteraction) {

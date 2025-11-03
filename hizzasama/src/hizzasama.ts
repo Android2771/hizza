@@ -550,9 +550,9 @@ client.on('interactionCreate', async (interaction: Interaction) => {
   }
 
   let invokerUpdated = false;
-  if(oldLeaderboard.length > 0){    
+  if(oldLeaderboard){    
     let newLeaderboard : Account[] = await (await fetch(`http://localhost:8080/api/coin-commands/coin-leaderboard`)).json();
-    for(let i = 0; i < newLeaderboard.length; i++){
+    for(let i = 0; i < newLeaderboard.length && i < oldLeaderboard.length; i++){
       if(oldLeaderboard[i].DiscordId !== newLeaderboard[i].DiscordId){
         updateMedal(newLeaderboard[i].DiscordId, i+1);
         if(newLeaderboard[i].DiscordId === interaction.user.id)
@@ -623,14 +623,14 @@ export async function coinLeaderboard(interaction: ChatInputCommandInteraction) 
 
 async function updateMedal(discordId : string, place : number){
   try{
-    console.log("Updating medal...")
     const guild = await client.guilds.fetch("841363743957975063");
     const member = await guild.members.fetch(discordId);
     const nickname = member.nickname;
     if(nickname !== null)
       await member.setNickname(place < 4 ? `${nickname.split(" ")[0]} ${["🥇", "🥈", "🥉"][place - 1]}` : nickname.split(" ")[0])
+    console.log(`Updated medal for ${discordId} with place ${place}`)
   }catch{
-    console.log("Could not update medal...")
+    console.log(`Could not update medal for ${discordId} with place ${place}`)
     return;
   }
 }

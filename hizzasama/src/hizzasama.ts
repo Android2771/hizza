@@ -524,6 +524,11 @@ client.on("messageCreate", async (message : any) => {
 
 client.on('interactionCreate', async (interaction: Interaction) => {
   if (!interaction.isChatInputCommand()) return;
+  
+  let oldLeaderboard : Account[] = [];
+  if(interaction.commandName.startsWith("coin") || interaction.commandName.startsWith("guess") || interaction.commandName === "challenge"){
+    oldLeaderboard = await (await fetch(`http://localhost:8080/api/coin-commands/coin-leaderboard`)).json();
+  }
 
   switch (interaction.commandName) {
     case "coinclaim":         try { await coinClaim(interaction); }       catch (err) { console.error(err) } break;
@@ -544,9 +549,14 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     case "guesstwelve":   try { await rouletteTwelves(interaction); } catch (err) { console.error(err) } break;
   }
 
-  // if(interaction.commandName.startsWith("coin") || interaction.commandName.startsWith("guess")){
-    
-  // }
+  if(oldLeaderboard.length > 0){    
+    let newLeaderboard : Account[] = await (await fetch(`http://localhost:8080/api/coin-commands/coin-leaderboard`)).json();
+    for(let i = 0; i < newLeaderboard.length; i++){
+      if(oldLeaderboard[i].DiscordId !== newLeaderboard[i].DiscordId){
+        updateMedal(newLeaderboard[i].DiscordId, i+1)
+      }
+    };
+  }
 });
 
 export async function coinClaim(interaction: ChatInputCommandInteraction) {
@@ -598,8 +608,7 @@ export async function coinLeaderboard(interaction: ChatInputCommandInteraction) 
     let leaderboardText = "**...................  LeaderBoard  ....................**\n";
     for(let i = 0; i < response.length; i++){
       let username = await fetchUsername(response[i].DiscordId);
-      leaderboardText += `${i+1}) **${username.padEnd(15, " ")}** with **${response[i].Balance.toString().padStart(5, " ")}** HizzaCoin\n`;
-      updateMedal(response[i].DiscordId, i+1)
+      leaderboardText += `${i < 3 ? ["🥇", "🥈", "🥉"][i] : i+1+")"} **${username.padEnd(15, " ")}** with **${response[i].Balance.toString().padStart(5, " ")}** HizzaCoin\n`;
     };
     
     await interaction.editReply(leaderboardText);
@@ -608,12 +617,14 @@ export async function coinLeaderboard(interaction: ChatInputCommandInteraction) 
 
 async function updateMedal(discordId : string, place : number){
   try{
+    console.log("Updating medal...")
     const guild = await client.guilds.fetch("841363743957975063");
     const member = await guild.members.fetch(discordId);
     const nickname = member.nickname;
     if(nickname !== null)
       await member.setNickname(place < 4 ? `${nickname.split(" ")[0]} ${["🥇", "🥈", "🥉"][place - 1]}` : nickname.split(" ")[0])
   }catch{
+    console.log("Could not update medal...")
     return;
   }
 }

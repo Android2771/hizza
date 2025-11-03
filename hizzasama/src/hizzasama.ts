@@ -614,10 +614,18 @@ export async function coinLeaderboard(interaction: ChatInputCommandInteraction) 
     for(let i = 0; i < response.length; i++){
       let username = await fetchUsername(response[i].DiscordId);
       leaderboardText += `${i+1}) **${username.padEnd(15, " ")}** with **${response[i].Balance.toString().padStart(5, " ")}** HizzaCoin\n`;
+      updateMedal(response[i].DiscordId, i+1)
     };
     
     await interaction.editReply(leaderboardText);
   }
+}
+
+async function updateMedal(discordId : string, place : number){
+  const guild = await client.guilds.fetch("841363743957975063");
+  const member = await guild.members.fetch(discordId);
+  const nickname = member.nickname || member.user.username;
+  await member.setNickname(place < 4 ? `${nickname.split(" ")[0]}${["🥇", "🥈", "🥉"][place - 1]}` : nickname.split(" ")[0])
 }
 
 export async function coinEconomy(interaction: ChatInputCommandInteraction) {
@@ -957,7 +965,7 @@ export async function rouletteNumber(interaction: ChatInputCommandInteraction) {
         let allNumberInputs = new Set<number>()
 
         numberInputs.split(",").forEach(number => {
-            let dashSplitNumber = number.split(/[-–]+/")
+            let dashSplitNumber = number.split(/[-–]+/)
             switch(dashSplitNumber.length){
                 case 1:
                     if(parseInt(number) < 0 || parseInt(number) > 36)

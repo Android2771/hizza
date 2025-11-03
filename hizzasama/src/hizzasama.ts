@@ -549,13 +549,19 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     case "guesstwelve":   try { await rouletteTwelves(interaction); } catch (err) { console.error(err) } break;
   }
 
+  let invokerUpdated = false;
   if(oldLeaderboard.length > 0){    
     let newLeaderboard : Account[] = await (await fetch(`http://localhost:8080/api/coin-commands/coin-leaderboard`)).json();
     for(let i = 0; i < newLeaderboard.length; i++){
       if(oldLeaderboard[i].DiscordId !== newLeaderboard[i].DiscordId){
-        updateMedal(newLeaderboard[i].DiscordId, i+1)
+        updateMedal(newLeaderboard[i].DiscordId, i+1);
+        if(newLeaderboard[i].DiscordId === interaction.user.id)
+          invokerUpdated = true;
       }
     };
+
+    if(!invokerUpdated)
+      updateMedal(interaction.user.id, 4)
   }
 });
 

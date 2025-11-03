@@ -213,24 +213,6 @@ if (process.argv[2]) {
       description: "I want to know today's destiny."
     },
     {
-      name: 'counter',
-      description: "Keep count of this for me",
-      options: [
-        {
-          name: "name",
-          description: "What is the name of the counter",
-          required: true,
-          type: 3
-        },
-        {
-          name: "increment",
-          description: "Whether to increment the counter or not",
-          required: false,
-          type: 5
-        }
-      ]
-    },
-    {
       name: "tell",
       description: "Hizza is now sentient, talk to her",
       options: [
@@ -557,11 +539,14 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     case "destiny":           try { await destiny(interaction); }         catch (err) { console.error(err) } break;
     case "tell":              try { await tell(interaction); }            catch (err) { console.error(err) } break;
     case "imagine":           try { await imagine(interaction); }         catch (err) { console.error(err) } break;
-    case "counter":           try { await counter(interaction); }         catch (err) { console.error(err) } break;
     case "guessnumbers":    try { await rouletteNumber(interaction); }  catch (err) { console.error(err) } break;
     case "guesscolour":    try { await rouletteColour(interaction); }  catch (err) { console.error(err) } break;
     case "guesstwelve":   try { await rouletteTwelves(interaction); } catch (err) { console.error(err) } break;
   }
+
+  // if(interaction.commandName.startsWith("coin") || interaction.commandName.startsWith("guess")){
+    
+  // }
 });
 
 export async function coinClaim(interaction: ChatInputCommandInteraction) {
@@ -622,11 +607,15 @@ export async function coinLeaderboard(interaction: ChatInputCommandInteraction) 
 }
 
 async function updateMedal(discordId : string, place : number){
-  const guild = await client.guilds.fetch("841363743957975063");
-  const member = await guild.members.fetch(discordId);
-  const nickname = member.nickname;
-  if(nickname !== null)
-    await member.setNickname(place < 4 ? `${nickname.split(" ")[0]}${["🥇", "🥈", "🥉"][place - 1]}` : nickname.split(" ")[0])
+  try{
+    const guild = await client.guilds.fetch("841363743957975063");
+    const member = await guild.members.fetch(discordId);
+    const nickname = member.nickname;
+    if(nickname !== null)
+      await member.setNickname(place < 4 ? `${nickname.split(" ")[0]} ${["🥇", "🥈", "🥉"][place - 1]}` : nickname.split(" ")[0])
+  }catch{
+    return;
+  }
 }
 
 export async function coinEconomy(interaction: ChatInputCommandInteraction) {
@@ -882,24 +871,6 @@ export async function imagine(interaction: ChatInputCommandInteraction){
     }else{
       await interaction.editReply("**GPT commands aren't available on this server**")
     }
-  }else{
-    return;
-  }
-}
-
-
-export async function counter(interaction: ChatInputCommandInteraction){
-  if(interaction){
-    const counterName = interaction.options.get('name')!.value?.toString()!;
-    if(counterName.length < 0 && counterName.length > 36){
-      await interaction.reply(`Counter name is too long! (not more than 36 characters)`);
-      return;
-    }
-
-    const increment = interaction.options.get('increment');
-    const response = await fetch(`https://andrewbuhagiar.com:8443/counter/${counterName}?increment=${increment ? increment.value : true}`);
-
-    await interaction.reply(`Counter \`${counterName}\` is at \`${await response.text()}\``);
   }else{
     return;
   }

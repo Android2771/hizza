@@ -106,7 +106,7 @@ const client = new Client(
 
 let sandbox = {};
 
-let legacyCommands : {[id: string] : (any) => void} = {
+let legacyCommands : {[id: string] : (arg0: any) => void} = {
     "howlong": message => {
       if (message.author.id === "225676494007959562" || message.author.id === "236478857849339905")
           message.channel.send(`Drea and Cath have been dating for \`${((Date.now() - (new Date(2020, 1, 21).valueOf())) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)

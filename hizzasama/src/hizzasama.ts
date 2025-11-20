@@ -406,7 +406,7 @@ client.on("messageCreate", async (message : any) => {
     }
 
     if(legacyCommands[message.content]){
-
+      legacyCommands[message.content]();
     }
 
     //Owner only commands

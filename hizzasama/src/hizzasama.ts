@@ -104,6 +104,7 @@ const client = new Client(
     ], partials: [Partials.Channel]
   })
 
+let sandbox = {};
 let chess : any;
 let commandsExecuted = 0;
 
@@ -480,10 +481,9 @@ client.on("messageCreate", async (message : any) => {
       if (message.content.startsWith("eval ")) {
         let output
         try {
-          output = `\`\`\`\n${eval(message.content.substr(5)).toString()}\`\`\``
-          message.channel.send(output)
+          message.channel.send(`\`\`\`\n${eval(message.content.substr(5))}\`\`\``)
         } catch (err) {
-          message.react("❌");
+          message.channel.send(`\`\`\`\n${err}\`\`\``)
         } finally {
           break OUTER_LOOP
         }

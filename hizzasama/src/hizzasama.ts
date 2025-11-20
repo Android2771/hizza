@@ -105,6 +105,42 @@ const client = new Client(
   })
 
 let sandbox = {};
+
+let legacyCommands : {[id: string] : (any) => void} = {
+    "howlong": message => {
+      if (message.author.id === "225676494007959562" || message.author.id === "236478857849339905")
+          message.channel.send(`Drea and Cath have been dating for \`${((Date.now() - (new Date(2020, 1, 21).valueOf())) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
+      else if (message.author.id === "183577847418322944" || message.author.id === "148455623313326080")
+          message.channel.send(`Andy Pandy and Nasi Poo have been dating for \`${((Date.now() - (new Date(2021, 7, 7)).valueOf()) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
+      else if (message.author.id === "586278312809201665" || message.author.id === "196171123019218944")
+      message.channel.send(`Anne and Chad have been dating for \`${((Date.now() - (new Date(2022, 11, 27)).valueOf()) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
+    },
+
+    "FUNNY": message => {message.channel.send("THE BIG LAUGH");},
+    "tay": message => {message.channel.send("I LOVE TAYLOR SWIFT 🤩😛🤯😍😱");},
+    "big destiny": message => {message.react("🐳")},
+    "can we get 5 likes": message => {
+      message.react("👍🏻")
+      message.react("👍🏼")
+      message.react("👍🏽")
+      message.react("👍🏾")
+      message.react("👍🏿")
+    },
+    "can we get 5 dislikes": message => {
+      message.react("👎🏻")
+      message.react("👎🏼")
+      message.react("👎🏽")
+      message.react("👎🏾")
+      message.react("👎🏿")
+    },
+    "bean": message => {
+      message.react("🇧")
+      message.react("🇪")
+      message.react("🇦")
+      message.react("🇳")
+    }
+  }
+
 let chess : any;
 let commandsExecuted = 0;
 
@@ -370,43 +406,8 @@ client.on("messageCreate", async (message : any) => {
       break OUTER_LOOP
     }
 
-    let legacyCommands : {[id: string] : () => void}= {
-      "howlong": () => {
-        if (message.author.id === "225676494007959562" || message.author.id === "236478857849339905")
-            message.channel.send(`Drea and Cath have been dating for \`${((Date.now() - (new Date(2020, 1, 21).valueOf())) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
-        else if (message.author.id === "183577847418322944" || message.author.id === "148455623313326080")
-            message.channel.send(`Andy Pandy and Nasi Poo have been dating for \`${((Date.now() - (new Date(2021, 7, 7)).valueOf()) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
-        else if (message.author.id === "586278312809201665" || message.author.id === "196171123019218944")
-        message.channel.send(`Anne and Chad have been dating for \`${((Date.now() - (new Date(2022, 11, 27)).valueOf()) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
-      },
-
-      "FUNNY": () => {message.channel.send("THE BIG LAUGH");},
-      "tay": () => {message.channel.send("I LOVE TAYLOR SWIFT 🤩😛🤯😍😱");},
-      "big destiny": () => {message.react("🐳")},
-      "can we get 5 likes": () => {
-        message.react("👍🏻")
-        message.react("👍🏼")
-        message.react("👍🏽")
-        message.react("👍🏾")
-        message.react("👍🏿")
-      },
-      "can we get 5 dislikes": () => {
-        message.react("👎🏻")
-        message.react("👎🏼")
-        message.react("👎🏽")
-        message.react("👎🏾")
-        message.react("👎🏿")
-      },
-      "bean": () => {
-        message.react("🇧")
-        message.react("🇪")
-        message.react("🇦")
-        message.react("🇳")
-      }
-    }
-
     if(legacyCommands[message.content]){
-      legacyCommands[message.content]();
+      legacyCommands[message.content](message);
     }
 
     //Owner only commands

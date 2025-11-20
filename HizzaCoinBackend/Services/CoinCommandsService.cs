@@ -323,7 +323,6 @@ public class CoinCommandsService
 
         return new RouletteResponse(rouletteNumber, bet, 0);
     }
-
     public async Task<RouletteResponse?> RouletteColour(string discordId, bool isColourRedBet, long bet)
     {
         var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);

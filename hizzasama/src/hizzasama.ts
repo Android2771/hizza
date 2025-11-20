@@ -404,64 +404,44 @@ client.on("messageCreate", async (message : any) => {
       break OUTER_LOOP
     }
 
-    if (!message.guildId) {
-      let msg = `*${message.author.username}*: ${message.content}`
-      sendMessage('183577847418322944', msg)
+    let legacyCommands : {[id: string] : () => void}= {
+      "howlong": () => {
+        if (message.author.id === "225676494007959562" || message.author.id === "236478857849339905")
+            message.channel.send(`Drea and Cath have been dating for \`${((Date.now() - (new Date(2020, 1, 21).valueOf())) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
+        else if (message.author.id === "183577847418322944" || message.author.id === "148455623313326080")
+            message.channel.send(`Andy Pandy and Nasi Poo have been dating for \`${((Date.now() - (new Date(2021, 7, 7)).valueOf()) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
+        else if (message.author.id === "586278312809201665" || message.author.id === "196171123019218944")
+        message.channel.send(`Anne and Chad have been dating for \`${((Date.now() - (new Date(2022, 11, 27)).valueOf()) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
+      },
 
-      //If not a developer, do not execute commands on dm's
-      let devs = ['183577847418322944', '252190585597853707']
-      if (!devs.includes(message.author.id))
-        break OUTER_LOOP
-    }
-
-    if (message.content === "howlong") {
-      if (message.author.id === "225676494007959562" || message.author.id === "236478857849339905")
-          message.channel.send(`Drea and Cath have been dating for \`${((Date.now() - (new Date(2020, 1, 21).valueOf())) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
-      else if (message.author.id === "183577847418322944" || message.author.id === "148455623313326080")
-          message.channel.send(`Andy Pandy and Nasi Poo have been dating for \`${((Date.now() - (new Date(2021, 7, 7)).valueOf()) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
-      else if (message.author.id === "586278312809201665" || message.author.id === "196171123019218944")
-	  message.channel.send(`Anne and Chad have been dating for \`${((Date.now() - (new Date(2022, 11, 27)).valueOf()) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
-      break OUTER_LOOP
-    }
-
-    //EASTER EGGS
-    //"funny" implies "the big laugh"
-    if (message.content === "FUNNY") {
-        message.channel.send("THE BIG LAUGH");
-    }
-
-    //HIZZA LIKES TAYLOR SWIFT
-    if (message.content === "tay") {
-        message.channel.send("I LOVE TAYLOR SWIFT 🤩😛🤯😍😱");
-    }
-
-    if (message.content.toLowerCase().includes("big destiny")) {
-        message.react("🐳")
-    }
-
-    if (message.content.toLowerCase().includes("can we get 5 likes")) {
+      "FUNNY": () => {message.channel.send("THE BIG LAUGH");},
+      "tay": () => {message.channel.send("I LOVE TAYLOR SWIFT 🤩😛🤯😍😱");},
+      "big destiny": () => {message.react("🐳")},
+      "can we get 5 likes": () => {
         message.react("👍🏻")
         message.react("👍🏼")
         message.react("👍🏽")
         message.react("👍🏾")
         message.react("👍🏿")
-    }
-
-    if (message.content.toLowerCase().includes("can we get 5 dislikes")) {
+      },
+      "can we get 5 dislikes": () => {
         message.react("👎🏻")
         message.react("👎🏼")
         message.react("👎🏽")
         message.react("👎🏾")
         message.react("👎🏿")
-    }
-
-    if (message.content.toLowerCase().includes(" bean ") || message.content.toLowerCase().startsWith("bean ") || message.content.toLowerCase().endsWith(" bean")) {
+      },
+      "bean": () => {
         message.react("🇧")
         message.react("🇪")
         message.react("🇦")
         message.react("🇳")
+      }
     }
 
+    if(legacyCommands[message.content]){
+
+    }
 
     //Owner only commands
     if (message.author.id === "183577847418322944") {      
@@ -480,10 +460,9 @@ client.on("messageCreate", async (message : any) => {
       if (message.content.startsWith("eval ")) {
         let output
         try {
-          output = `\`\`\`\n${eval(message.content.substr(5)).toString()}\`\`\``
-          message.channel.send(output)
+          message.channel.send(`\`\`\`\n${eval(message.content.substr(5))}\`\`\``)
         } catch (err) {
-          message.react("❌");
+          message.channel.send(`\`\`\`\n${err}\`\`\``)
         } finally {
           break OUTER_LOOP
         }

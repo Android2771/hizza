@@ -324,29 +324,6 @@ public class CoinCommandsService
         return new RouletteResponse(rouletteNumber, bet, 0);
     }
 
-    public async Task<RouletteResponse?> RouletteTwelve(string discordId, long twelveBet, long bet)
-    {
-        var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);
-        var spoils = bet * 3;
-        
-        if (twelveBet is < 1 or > 3 || (await TakeBet(discordId, bet)).Id == null)
-            return new RouletteResponse(0, 0, 0);
-
-        if ((twelveBet == 1 && rouletteNumber is >= 1 and <= 12) ||
-                (twelveBet == 2 && rouletteNumber is >= 13 and <= 24) ||
-                (twelveBet == 3 && rouletteNumber is >= 25 and <= 36))
-        {
-            if ((await PayOutSpoils(discordId, bet * 3)).Id != null)
-            {
-                return new RouletteResponse(rouletteNumber, bet, spoils);
-            }
-
-            return new RouletteResponse(0, 0, 0);
-        }
-
-        return new RouletteResponse(rouletteNumber, bet, 0);
-    }
-
     public async Task<RouletteResponse?> RouletteColour(string discordId, bool isColourRedBet, long bet)
     {
         var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);

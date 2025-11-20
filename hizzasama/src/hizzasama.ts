@@ -213,30 +213,30 @@ if (process.argv[2]) {
       name: 'destiny',
       description: "I want to know today's destiny."
     },
-    {
-      name: "tell",
-      description: "Hizza is now sentient, talk to her",
-      options: [
-        {
-          name: "prompt",
-          description: "What to tell hizza",
-          required: true,
-          type: 3
-        }
-      ]
-    },
-    {
-      name: "imagine",
-      description: "Hizza generates images now",
-      options: [
-        {
-          name: "prompt",
-          description: "What image to generate",
-          required: true,
-          type: 3
-        }
-      ]
-    },
+    // {
+    //   name: "tell",
+    //   description: "Hizza is now sentient, talk to her",
+    //   options: [
+    //     {
+    //       name: "prompt",
+    //       description: "What to tell hizza",
+    //       required: true,
+    //       type: 3
+    //     }
+    //   ]
+    // },
+    // {
+    //   name: "imagine",
+    //   description: "Hizza generates images now",
+    //   options: [
+    //     {
+    //       name: "prompt",
+    //       description: "What image to generate",
+    //       required: true,
+    //       type: 3
+    //     }
+    //   ]
+    // },
     {
       name: "guessnumbers",
       description: "Guess numbers between 0 and 36 with a chance to win up to x36 your HizzaCoin",
@@ -274,27 +274,6 @@ if (process.argv[2]) {
           min_value: 1
         }
       ]
-    },
-    {
-      name: "guesstwelve",
-      description: "Guess what multiple of 12 number will belong to up to 3, with a chance to win x3 HizzaCoin",
-      options: [
-        {
-          name: "twelve",
-          description: "Which multiple of 12, 1, 2 or 3",
-          required: true,
-          type: 4,                 
-          min_value: 1,
-          max_value: 3
-        },
-        {
-          name: 'wager',
-          description: 'How much hizzacoin',
-          required: true,
-          type: 4,
-          min_value: 1
-        }
-      ]
     }
   ];
 
@@ -315,20 +294,6 @@ if (process.argv[2]) {
 client.on('ready', () => {
   console.log(`Logged in as ${client.user?.tag}!`);
 });
-
-client.on('presenceUpdate', async (oldPresence, newPresence) => {
-if(newPresence!.guild!.id !== "841363743957975063")
-  return;
-
- let status : number;
- switch(newPresence.status){
-   case "online": status = 0; break;
-   case "idle": status = 1; break;
-   case "dnd": status = 2; break;
-   case "offline": status = 3; break;
-   default: status = -1; break;
- }
-})
 
 client.on("messageCreate", async (message : any) => {
   // If bot is saying it then ignore, bot should not execute commands
@@ -528,7 +493,6 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     case "imagine":           try { await imagine(interaction); }         catch (err) { console.error(err) } break;
     case "guessnumbers":    try { await rouletteNumber(interaction); }  catch (err) { console.error(err) } break;
     case "guesscolour":    try { await rouletteColour(interaction); }  catch (err) { console.error(err) } break;
-    case "guesstwelve":   try { await rouletteTwelves(interaction); } catch (err) { console.error(err) } break;
   }
   if(oldLeaderboard){    
     let newLeaderboard : Account[] = await (await fetch(`http://localhost:8080/api/coin-commands/coin-leaderboard`)).json();
@@ -995,19 +959,6 @@ export async function rouletteColour(interaction: ChatInputCommandInteraction) {
       await interaction.reply(`You managed to guess the colour of the number \`${response.RouletteNumber}\`! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin (x2) 🪙🪙🪙`)
     }else if(response.Bet > 0){
       await interaction.reply(`You did not manage to guess the colour of the number \`${response.RouletteNumber}\` and lost \`${response.Bet}\` HizzaCoin`)
-    }else{
-      await interaction.reply(`You do not have enough money to bet! Try \`coin claim\` to get more`)
-    }
-  }
-}
-
-export async function rouletteTwelves(interaction: ChatInputCommandInteraction) {
-  if(interaction){
-    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-twelve?discordId=${interaction.user.id}&twelveBet=${interaction.options!.get('twelve')!.value!}&bet=${interaction.options!.get('wager')!.value!}`)).json();
-    if(response.Payout > 0){
-      await interaction.reply(`You managed to guess the twelve of the number \`${response.RouletteNumber}\`! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin (x3) 🪙🪙🪙!`)
-    }else if(response.Bet > 0){
-      await interaction.reply(`You did not manage to guess the twelve of the number \`${response.RouletteNumber}\` and lost \`${response.Bet}\` HizzaCoin`)
     }else{
       await interaction.reply(`You do not have enough money to bet! Try \`coin claim\` to get more`)
     }

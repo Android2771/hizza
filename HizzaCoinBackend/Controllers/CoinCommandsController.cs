@@ -79,10 +79,6 @@ public class CoinCommandsController : ControllerBase
     public async Task<ActionResult<RouletteResponse?>> RouletteNumber(string discordId, string numberBets, long bet) =>
         await _coinCommandsService.RouletteNumber(discordId, numberBets, bet);
     
-    [HttpGet("roulette-twelve")]
-
-    public async Task<ActionResult<RouletteResponse?>> RouletteTwelve(string discordId, long twelveBet, long bet) =>
-        await _coinCommandsService.RouletteTwelve(discordId, twelveBet, bet);
     
     [HttpGet("roulette-colour")]
 

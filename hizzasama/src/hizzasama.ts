@@ -104,6 +104,7 @@ const client = new Client(
     ], partials: [Partials.Channel]
   })
 
+let sandbox = {};
 let chess : any;
 let commandsExecuted = 0;
 

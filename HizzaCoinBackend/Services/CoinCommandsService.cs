@@ -64,8 +64,9 @@ public class CoinCommandsService
         }
 
         //Add Multiplier
-        var addMultiplier = RandomNumberGenerator.GetInt32(0, 5) == 0;
-        var multiplier = addMultiplier ? GetMultiplier() : 1;
+        var addMultiplier = RandomNumberGenerator.GetInt32(0, 100) < 15;
+        var maxMultiplier = claimedReward.RewardedAmount > 0 ? 5 : 15;
+        var multiplier = addMultiplier ? GetMultiplier(maxMultiplier) : 1;
         totalClaim = (int)(totalClaim * multiplier);
 
         account.LastClaimDate = DateTime.UtcNow.Date;
@@ -377,10 +378,10 @@ public class CoinCommandsService
         return 2;
     }
 
-    private double GetMultiplier()
+    private double GetMultiplier(double max)
     {
         Random rand = new Random();
-        double randomValue = 1.1 + rand.NextDouble() * (5.0 - 1.1);
+        double randomValue = 1.1 + rand.NextDouble() * (max - 1.1);
         return Math.Round(randomValue, 2);
     }
 

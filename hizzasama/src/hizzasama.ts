@@ -413,19 +413,16 @@ client.on("messageCreate", async (message : any) => {
     //Owner only commands
     if (message.author.id === "183577847418322944") {      
       if (message.content.startsWith("exec ")) {
-        let output
         try {
-          output = `\`\`\`\n${execSync(message.content.substr(5), { encoding: 'utf-8' })}\`\`\``
-          message.channel.send(output)
+          message.channel.send(`\`\`\`\n${execSync(message.content.substr(5), {encoding: 'utf-8'})}\`\`\``)
         } catch (err) {
-          message.react("❌");
+          message.channel.send(`\`\`\`\n${err}\`\`\``)
         } finally {
           break OUTER_LOOP
         }
       }
 
       if (message.content.startsWith("eval ")) {
-        let output
         try {
           message.channel.send(`\`\`\`\n${eval(message.content.substr(5))}\`\`\``)
         } catch (err) {
@@ -525,7 +522,7 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
       responseText = "You have already claimed your coin!";
     else{
       if(response.Streak > 0)
-        responseText += `\`+${Math.min(response.Streak, 30)}\` Streak ${response.Streak >= 10 ? 'MAX' : ''}\n`;
+        responseText += `\`+${Math.min(response.Streak, 30)}\` Streak ${response.Streak >= 30 ? 'MAX' : 'PROTECTED'}\n`;
       if(response.ClaimedReward.RewardedAmount > 0)
         responseText += `\`+${response.ClaimedReward.RewardedAmount}\` Reward for \`${response.ClaimedReward.Streak}\` Streak\n`;
       if(response.Multiplier > 1)

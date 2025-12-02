@@ -679,8 +679,7 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
           components: [responseRow],
         });
 
-        const timeout = 900000;
-        const buttonCollector = interaction.channel!.createMessageComponentCollector({ time: timeout });
+        const buttonCollector = interaction.channel!.createMessageComponentCollector();
 
         buttonCollector.on('collect', async (buttonInteraction : ButtonInteraction) => {
           if(buttonInteraction.customId.split(':')[1] !== initiateResponse.Id)

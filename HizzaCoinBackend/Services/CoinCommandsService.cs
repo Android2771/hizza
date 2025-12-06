@@ -365,6 +365,7 @@ public class CoinCommandsService
                 {
                     rouletteNumber++;
                     destinyIntervened = true;
+                    roulette.RolledNumber = rouletteNumber;
                 }
                 break;
             case Destiny.Somewhat:
@@ -372,6 +373,7 @@ public class CoinCommandsService
                 {
                     rouletteNumber++;
                     destinyIntervened = true;
+                    roulette.RolledNumber = rouletteNumber;
                 }
                 break;
             case Destiny.Very:
@@ -379,6 +381,7 @@ public class CoinCommandsService
                 {
                     rouletteNumber++;
                     destinyIntervened = true;
+                    roulette.RolledNumber = rouletteNumber;
                 }
                 break;
             case Destiny.Insane:
@@ -386,6 +389,7 @@ public class CoinCommandsService
                 {
                     rouletteNumber++;
                     destinyIntervened = true;
+                    roulette.RolledNumber = rouletteNumber;
                 }
                 break;
         }

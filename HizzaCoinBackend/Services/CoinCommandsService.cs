@@ -430,7 +430,7 @@ public class CoinCommandsService
     private Destiny GetDestiny()
     {
         DateTime date = DateTime.Now;
-        long seed = date.Day + date.Month;
+        long seed = date.Day + date.Month - 1;
 
         if (seed % 3 == 0 || seed % 5 == 0)
             return Destiny.Big;

@@ -361,14 +361,14 @@ public class CoinCommandsService
         switch (GetDestiny())
         {
             case Destiny.Small:
-                if ((isColourRedBet && rouletteNumber is 1 or 3) || (!isColourRedBet && rouletteNumber is 2 or 4))
+                if ((isColourRedBet && rouletteNumber is 1 or 3 or 5) || (!isColourRedBet && rouletteNumber is 2 or 4 or 6))
                 {
                     rouletteNumber++;
                     destinyIntervened = true;
                 }
                 break;
             case Destiny.Somewhat:
-                if ((isColourRedBet && rouletteNumber == 1) || (!isColourRedBet && rouletteNumber == 2))
+                if ((isColourRedBet && rouletteNumber is 1 or 3) || (!isColourRedBet && rouletteNumber is 2 or 4))
                 {
                     rouletteNumber++;
                     destinyIntervened = true;
@@ -382,7 +382,7 @@ public class CoinCommandsService
                 }
                 break;
             case Destiny.Insane:
-                if ((isColourRedBet && rouletteNumber is 2 or 4) || (!isColourRedBet && rouletteNumber is 1 or 3))
+                if ((isColourRedBet && rouletteNumber is 2 or 4 or 6) || (!isColourRedBet && rouletteNumber is 1 or 3 or 5))
                 {
                     rouletteNumber++;
                     destinyIntervened = true;
@@ -418,11 +418,11 @@ public class CoinCommandsService
     {
         return GetDestiny() switch
         {
-            Destiny.Small => 2,
-            Destiny.Somewhat => 4,
-            Destiny.Big => 5,
-            Destiny.Very => 7,
-            Destiny.Insane => 10,
+            Destiny.Small => 15,
+            Destiny.Somewhat => 30,
+            Destiny.Big => 40,
+            Destiny.Very => 50,
+            Destiny.Insane => 70,
             _ => 2
         };
     }

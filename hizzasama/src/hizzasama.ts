@@ -413,19 +413,16 @@ client.on("messageCreate", async (message : any) => {
     //Owner only commands
     if (message.author.id === "183577847418322944") {      
       if (message.content.startsWith("exec ")) {
-        let output
         try {
-          output = `\`\`\`\n${execSync(message.content.substr(5), { encoding: 'utf-8' })}\`\`\``
-          message.channel.send(output)
+          message.channel.send(`\`\`\`\n${execSync(message.content.substr(5), {encoding: 'utf-8'})}\`\`\``)
         } catch (err) {
-          message.react("❌");
+          message.channel.send(`\`\`\`\n${err}\`\`\``)
         } finally {
           break OUTER_LOOP
         }
       }
 
       if (message.content.startsWith("eval ")) {
-        let output
         try {
           message.channel.send(`\`\`\`\n${eval(message.content.substr(5))}\`\`\``)
         } catch (err) {
@@ -525,13 +522,16 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
       responseText = "You have already claimed your coin!";
     else{
       if(response.Streak > 0)
-        responseText += `\`+${Math.min(response.Streak, 30)}\` Streak ${response.Streak >= 10 ? 'MAX' : ''}\n`;
+        responseText += `\`+${Math.min(response.Streak, 30)}\` Streak ${response.Streak >= 30 ? 'MAX' : 'PROTECTED'}\n`;
       if(response.ClaimedReward.RewardedAmount > 0)
         responseText += `\`+${response.ClaimedReward.RewardedAmount}\` Reward for \`${response.ClaimedReward.Streak}\` Streak\n`;
       if(response.Multiplier > 1)
         responseText += `\`x${response.Multiplier}\` MULTIPLIER! 🪙🪙\n`;
       
       responseText += `\n**TOTAL COIN CLAIMED:** \`${response.TotalClaim}\` 🪙\n`
+
+      if(response.Streak === 30)
+        responseText += `\n**YOUR STREAK IS NOT PROTECTED ANYMORE, CLAIM EVERYDAY TO KEEP YOUR STREAK!**\n\n`
       if(response.NextReward)
         responseText += `Next Reward is in \`${response.NextReward.Streak - response.Streak}\` days!   (Streak Progress: \`${response.Streak}\`/\`${response.NextReward.Streak}\`)\n`;
     }
@@ -957,10 +957,20 @@ export async function rouletteNumber(interaction: ChatInputCommandInteraction) {
 export async function rouletteColour(interaction: ChatInputCommandInteraction) {
   if(interaction){
     const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-colour?discordId=${interaction.user.id}&isColourRedBet=${interaction.options!.get('red')!.value!}&bet=${interaction.options!.get('wager')!.value!}`)).json();
+    
+    let colour = ''
+    let redColours = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 13, 25, 27, 30, 32, 34, 36];
+    if(response.RouletteNumber === 0)
+      colour = '🟢'
+    else if(redColours.includes(response.RouletteNumber))
+      colour = '🔴'
+    else
+      colour = '⚫'
+
     if(response.Payout > 0){
-      await interaction.reply(`You managed to guess the colour of the number \`${response.RouletteNumber}\`! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin (x2) 🪙🪙🪙`)
+      await interaction.reply(`You managed to guess the colour of the number \`${response.RouletteNumber}\` ${colour}! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin (x2) 🪙🪙🪙`)
     }else if(response.Bet > 0){
-      await interaction.reply(`You did not manage to guess the colour of the number \`${response.RouletteNumber}\` and lost \`${response.Bet}\` HizzaCoin`)
+      await interaction.reply(`You did not manage to guess the colour of the number \`${response.RouletteNumber}\` ${colour} and lost \`${response.Bet}\` HizzaCoin`)
     }else{
       await interaction.reply(`You do not have enough money to bet! Try \`coin claim\` to get more`)
     }

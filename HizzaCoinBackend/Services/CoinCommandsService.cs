@@ -51,7 +51,7 @@ public class CoinCommandsService
         //Calculate total base claim with streak
         var baseClaim = GetBaseClaim() * 3;
         var nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
-        account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) || account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-2) ? account.Streak + 1 : 0;
+        account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) || account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-2) || account.Streak <= 30 ? account.Streak + 1 : 0;
         var totalClaim = baseClaim + Math.Min(account.Streak, 30);
 
         //Add reward
@@ -337,6 +337,27 @@ public class CoinCommandsService
             return new RouletteResponse(0, 0, 0);
 
         int[] redColours = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 13, 25, 27, 30, 32, 34, 36];
+        
+        switch (GetDestiny())
+        {
+            case Destiny.Small:
+                if ((isColourRedBet && rouletteNumber is 1 or 3) || (!isColourRedBet && rouletteNumber is 2 or 4))
+                    rouletteNumber++;
+                break;
+            case Destiny.Somewhat:
+                if ((isColourRedBet && rouletteNumber == 1) || (!isColourRedBet && rouletteNumber == 2))
+                    rouletteNumber++;
+                break;
+            case Destiny.Very:
+                if ((isColourRedBet && rouletteNumber == 2) || (!isColourRedBet && rouletteNumber == 1))
+                    rouletteNumber++;
+                break;
+            case Destiny.Insane:
+                if ((isColourRedBet && rouletteNumber is 2 or 4) || (!isColourRedBet && rouletteNumber is 1 or 3))
+                    rouletteNumber++;
+                break;
+        }
+
         if (rouletteNumber != 0 && (isColourRedBet && redColours.Contains(rouletteNumber) || !isColourRedBet && !redColours.Contains(rouletteNumber)))
         {
             var rewardTransaction = await PayOutSpoils(discordId, bet * 2);
@@ -363,19 +384,32 @@ public class CoinCommandsService
 
     private long GetBaseClaim()
     {
+        return GetDestiny() switch
+        {
+            Destiny.Small => 2,
+            Destiny.Somewhat => 4,
+            Destiny.Big => 5,
+            Destiny.Very => 7,
+            Destiny.Insane => 10,
+            _ => 2
+        };
+    }
+
+    private Destiny GetDestiny()
+    {
         DateTime date = DateTime.Now;
         long seed = date.Day + date.Month;
 
         if (seed % 3 == 0 || seed % 5 == 0)
-            return 5;
+            return Destiny.Big;
         if (seed % 17 == 0)
-            return 10;
+            return Destiny.Insane;
         if (seed % 4 == 0 || seed % 7 == 0)
-            return 7;
+            return Destiny.Very;
         if (seed % 2 == 1)
-            return 4;
-        
-        return 2;
+            return Destiny.Somewhat;
+
+        return Destiny.Small;
     }
 
     private double GetMultiplier(double max)

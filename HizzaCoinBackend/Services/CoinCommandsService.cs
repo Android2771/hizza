@@ -66,6 +66,13 @@ public class CoinCommandsService
         //Add Multiplier
         var addMultiplier = RandomNumberGenerator.GetInt32(0, 100) < 15;
         var maxMultiplier = claimedReward.RewardedAmount > 0 ? 5 : 15;
+        switch (GetDestiny())
+        {
+            case Destiny.Small: maxMultiplier = (int)(maxMultiplier * 0.6); break;
+            case Destiny.Somewhat: maxMultiplier = (int)(maxMultiplier * 0.8); break;
+            case Destiny.Very: maxMultiplier = (int)(maxMultiplier * 1.2); break;
+            case Destiny.Insane: maxMultiplier = (int)(maxMultiplier * 1.4); break;
+        }
         var multiplier = addMultiplier ? GetMultiplier(maxMultiplier) : 1;
         totalClaim = (int)(totalClaim * multiplier);
 
@@ -301,12 +308,12 @@ public class CoinCommandsService
         foreach (long numberBet in numberBetInts)
         {
             if (numberBet is < 0 or > 36)
-                return new RouletteResponse(0, 0, 0);
+                return new RouletteResponse(0, 0, 0, false);
         }
 
         if ((await TakeBet(discordId, bet)).Id == null)
         {
-            return new RouletteResponse(0, 0, 0);
+            return new RouletteResponse(0, 0, 0, false);
         }
         
         foreach(long numberBet in numberBetInts)
@@ -315,26 +322,27 @@ public class CoinCommandsService
                 {
                     if ((await PayOutSpoils(discordId, spoils)).Id != null)
                     {
-                        return new RouletteResponse(rouletteNumber, bet, spoils);
+                        return new RouletteResponse(rouletteNumber, bet, spoils, false);
                     }
 
-                    return new RouletteResponse(0, 0, 0);
+                    return new RouletteResponse(0, 0, 0, false);
                 }
         }
 
-        return new RouletteResponse(rouletteNumber, bet, 0);
+        return new RouletteResponse(rouletteNumber, bet, 0, false);
     }
     public async Task<RouletteResponse?> RouletteColour(string discordId, bool isColourRedBet, long bet)
     {
         var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);
         var spoils = bet * 2;
         var betTransaction = await TakeBet(discordId, bet);
+        var destinyIntervened = false;
         
         Roulette roulette = new Roulette(isColourRedBet ? 1 : 0, rouletteNumber, RouletteType.Colour);
         roulette.WageredTransactionId = betTransaction.Id;
         
         if(betTransaction.Id == null)
-            return new RouletteResponse(0, 0, 0);
+            return new RouletteResponse(0, 0, 0, destinyIntervened);
 
         int[] redColours = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 13, 25, 27, 30, 32, 34, 36];
         
@@ -342,19 +350,31 @@ public class CoinCommandsService
         {
             case Destiny.Small:
                 if ((isColourRedBet && rouletteNumber is 1 or 3) || (!isColourRedBet && rouletteNumber is 2 or 4))
+                {
                     rouletteNumber++;
+                    destinyIntervened = true;
+                }
                 break;
             case Destiny.Somewhat:
                 if ((isColourRedBet && rouletteNumber == 1) || (!isColourRedBet && rouletteNumber == 2))
+                {
                     rouletteNumber++;
+                    destinyIntervened = true;
+                }
                 break;
             case Destiny.Very:
                 if ((isColourRedBet && rouletteNumber == 2) || (!isColourRedBet && rouletteNumber == 1))
+                {
                     rouletteNumber++;
+                    destinyIntervened = true;
+                }
                 break;
             case Destiny.Insane:
                 if ((isColourRedBet && rouletteNumber is 2 or 4) || (!isColourRedBet && rouletteNumber is 1 or 3))
+                {
                     rouletteNumber++;
+                    destinyIntervened = true;
+                }
                 break;
         }
 
@@ -365,14 +385,14 @@ public class CoinCommandsService
             {
                 roulette.RewardTransactionId = rewardTransaction.Id;
                 await _rouletteService.CreateAsync(roulette);
-                return new RouletteResponse(rouletteNumber, bet, spoils);
+                return new RouletteResponse(rouletteNumber, bet, spoils, destinyIntervened);
             }
 
-            return new RouletteResponse(0, 0, 0);
+            return new RouletteResponse(0, 0, 0, destinyIntervened);
         }
 
         await _rouletteService.CreateAsync(roulette);
-        return new RouletteResponse(rouletteNumber, bet, 0);
+        return new RouletteResponse(rouletteNumber, bet, 0, destinyIntervened);
     }
 
 

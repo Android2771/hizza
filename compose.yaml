@@ -11,8 +11,6 @@ services:
       - ./screen/resources:/screen/resources
     restart: unless-stopped
     network_mode: host
-    depends_on:
-      - hizzacoin-backend
   hizzacoin-backend:
     container_name: hizzacoin-backend
     build:

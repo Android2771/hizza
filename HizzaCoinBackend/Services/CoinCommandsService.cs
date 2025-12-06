@@ -34,7 +34,7 @@ public class CoinCommandsService
         }
 
         //Check whether last claim was today
-        if (account == null || account.LastClaimDate == DateTime.UtcNow.Date)
+        if (account == null)
         {
             return new CoinClaimResponse(
                 discordId,
@@ -49,7 +49,7 @@ public class CoinCommandsService
         }
 
         //Calculate total base claim with streak
-        var baseClaim = GetBaseClaim() * 3;
+        var baseClaim = GetBaseClaim();
         var nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
         account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) || account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-2) || account.Streak <= 30 ? account.Streak + 1 : 0;
         var totalClaim = baseClaim + Math.Min(account.Streak, 30);
@@ -430,7 +430,7 @@ public class CoinCommandsService
     private Destiny GetDestiny()
     {
         DateTime date = DateTime.Now;
-        long seed = date.Day + date.Month;
+        long seed = date.Day + date.Month - 1;
 
         if (seed % 3 == 0 || seed % 5 == 0)
             return Destiny.Big;

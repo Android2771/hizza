@@ -501,13 +501,13 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     const removedIds = [...oldIds].filter(id => !newIds.has(id));
 
     removedIds.forEach(id => {
-      updateMedal(id, 4)
+      // updateMedal(id, 4)
     });
 
     for(let i = 0; i < newLeaderboard.length && i < oldLeaderboard.length; i++){  
       //Update medal for leaderboard place changes or if first command
       if(oldLeaderboard[i].DiscordId !== newLeaderboard[i].DiscordId || commandsExecuted === 1){
-        updateMedal(newLeaderboard[i].DiscordId, i+1);
+        // updateMedal(newLeaderboard[i].DiscordId, i+1);
       }
     };
   }

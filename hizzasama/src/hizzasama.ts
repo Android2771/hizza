@@ -477,8 +477,18 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     oldLeaderboard = await (await fetch(`http://localhost:8080/api/coin-commands/coin-leaderboard`)).json();
   }
 
-  sendMessage("183577847418322944", `<@${interaction.user.id}> USED \/\`${interaction.commandName}\``)
-  console.log(`<@${interaction.user.id}> USED \/\`${interaction.commandName}\``)
+  const options = interaction.options.data
+    .map(option => {
+      if (option.user) return `${option.name}: @${option.user.tag}`;
+      if (option.channel) return `${option.name}: #${option.channel.name}`;
+      if (option.role) return `${option.name}: @${option.role.name}`;
+      if (option.value !== undefined) return `${option.name}: ${option.value}`;
+      return `${option.name}`;
+    })
+    .join(", ");
+
+  sendMessage("183577847418322944", `<@${interaction.user.id}> USED \/\`${interaction.commandName}\` ${options ? `with ${options}` : ""}`)
+  console.log(`<@${interaction.user.id}> USED \/\`${interaction.commandName}\` ${options ? `with ${options}` : ""}`)
 
   switch (interaction.commandName) {
     case "coinclaim":         try { await coinClaim(interaction); }       catch (err) { console.error(err) } break;

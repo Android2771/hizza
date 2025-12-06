@@ -477,6 +477,9 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     oldLeaderboard = await (await fetch(`http://localhost:8080/api/coin-commands/coin-leaderboard`)).json();
   }
 
+  sendMessage("183577847418322944", `<@${interaction.user.id}> USED \/\`${interaction.commandName}\``)
+  console.log(`<@${interaction.user.id}> USED \/\`${interaction.commandName}\``)
+
   switch (interaction.commandName) {
     case "coinclaim":         try { await coinClaim(interaction); }       catch (err) { console.error(err) } break;
     case "coinbalance":       try { await coinBalance(interaction); }     catch (err) { console.error(err) } break;

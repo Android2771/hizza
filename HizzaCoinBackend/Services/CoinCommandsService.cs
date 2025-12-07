@@ -69,20 +69,20 @@ public class CoinCommandsService
         switch (GetDestiny())
         {
             case Destiny.Small: 
-                maxMultiplier = (int)(maxMultiplier * 0.6); 
-                addMultiplier = (int)(addMultiplier * 0.6); 
+                maxMultiplier = (int)(maxMultiplier * 0.7); 
+                addMultiplier = (int)(addMultiplier * 0.7); 
             break;
             case Destiny.Somewhat: 
-                maxMultiplier = (int)(maxMultiplier * 0.8); 
-                addMultiplier = (int)(addMultiplier * 0.8); 
+                maxMultiplier = (int)(maxMultiplier * 0.9); 
+                addMultiplier = (int)(addMultiplier * 0.9); 
             break;
             case Destiny.Very: 
-                maxMultiplier = (int)(maxMultiplier * 1.2);
-                addMultiplier = (int)(addMultiplier * 1.2);
+                maxMultiplier = (int)(maxMultiplier * 1.1);
+                addMultiplier = (int)(addMultiplier * 1.1);
             break;
             case Destiny.Insane: 
-                maxMultiplier = (int)(maxMultiplier * 1.4);
-                addMultiplier = (int)(addMultiplier * 1.4);
+                maxMultiplier = (int)(maxMultiplier * 1.3);
+                addMultiplier = (int)(addMultiplier * 1.3);
             break;
         }
         var multiplier = addMultiplier < 15 ? GetMultiplier(maxMultiplier) : 1;
@@ -345,7 +345,7 @@ public class CoinCommandsService
     }
     public async Task<RouletteResponse?> RouletteColour(string discordId, bool isColourRedBet, long bet)
     {
-        var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);
+        var rouletteNumber = RandomNumberGenerator.GetInt32(0, 10);
         var spoils = bet * 2;
         var betTransaction = await TakeBet(discordId, bet);
         var destinyIntervened = false;
@@ -385,7 +385,7 @@ public class CoinCommandsService
                 }
                 break;
             case Destiny.Insane:
-                if ((isColourRedBet && rouletteNumber is 2 or 4 or 6 or 8) || (!isColourRedBet && rouletteNumber is 1 or 3 or 5 or 7))
+                if ((isColourRedBet && rouletteNumber is 2 or 4 or 6) || (!isColourRedBet && rouletteNumber is 1 or 3 or 5))
                 {
                     rouletteNumber++;
                     destinyIntervened = true;

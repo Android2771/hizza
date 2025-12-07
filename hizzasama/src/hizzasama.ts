@@ -487,7 +487,6 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     })
     .join(", ");
 
-  sendMessage("183577847418322944", `<@${interaction.user.id}> USED \/\`${interaction.commandName}\` ${options ? `with ${options}` : ""}`)
   console.log(`<@${interaction.user.id}> USED \/${interaction.commandName} ${options ? `with ${options}` : ""}`)
 
   switch (interaction.commandName) {
@@ -520,7 +519,9 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     for(let i = 0; i < newLeaderboard.length && i < oldLeaderboard.length; i++){  
       //Update medal for leaderboard place changes or if first command
       if(oldLeaderboard[i].DiscordId !== newLeaderboard[i].DiscordId || commandsExecuted === 1){
-        updateMedal(newLeaderboard[i].DiscordId, i+1);
+        setTimeout(() => {
+            updateMedal(newLeaderboard[i].DiscordId, i+1);
+        }, i * 2000)
       }
     };
   }

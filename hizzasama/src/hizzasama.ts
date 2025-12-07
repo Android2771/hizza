@@ -488,7 +488,7 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     .join(", ");
 
   sendMessage("183577847418322944", `<@${interaction.user.id}> USED \/\`${interaction.commandName}\` ${options ? `with ${options}` : ""}`)
-  console.log(`<@${interaction.user.id}> USED \/\`${interaction.commandName}\` ${options ? `with ${options}` : ""}`)
+  console.log(`<@${interaction.user.id}> USED \/${interaction.commandName} ${options ? `with ${options}` : ""}`)
 
   switch (interaction.commandName) {
     case "coinclaim":         try { await coinClaim(interaction); }       catch (err) { console.error(err) } break;

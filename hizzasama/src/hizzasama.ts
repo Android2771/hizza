@@ -998,10 +998,10 @@ const getDestinyVal = () => {
     return 3;
   else if ((seed % 17 === 0))  //insane destiny
     return 5;
-  else if ((seed % 4 === 0) || (seed % 7 === 0)) //very big destiny
-    return 4;
-  else if (seed % 2 === 1) //somewhat big destiny
+  else if ((seed % 4 === 0) || (seed % 7 === 0)) //somewhat destiny
     return 2;
+  else if (seed % 2 === 1) //very big destiny
+    return 4;
   else             //small destiny
     return 1;
 }

@@ -345,7 +345,7 @@ public class CoinCommandsService
     }
     public async Task<RouletteResponse?> RouletteColour(string discordId, bool isColourRedBet, long bet)
     {
-        var rouletteNumber = RandomNumberGenerator.GetInt32(0, 10);
+        var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);
         var spoils = bet * 2;
         var betTransaction = await TakeBet(discordId, bet);
         var destinyIntervened = false;
@@ -441,9 +441,9 @@ public class CoinCommandsService
         if (seed % 17 == 0)
             return Destiny.Insane;
         if (seed % 4 == 0 || seed % 7 == 0)
-            return Destiny.Very;
-        if (seed % 2 == 1)
             return Destiny.Somewhat;
+        if (seed % 2 == 1)
+            return Destiny.Very;
 
         return Destiny.Small;
     }

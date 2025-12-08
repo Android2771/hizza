@@ -369,7 +369,7 @@ public class CoinCommandsService
                 }
                 break;
             case Destiny.Somewhat:
-                if ((isColourRedBet && rouletteNumber is 1 or 3) || (!isColourRedBet && rouletteNumber is 2 or 4))
+                if ((isColourRedBet && rouletteNumber == 1) || (!isColourRedBet && rouletteNumber == 2))
                 {
                     rouletteNumber++;
                     destinyIntervened = true;

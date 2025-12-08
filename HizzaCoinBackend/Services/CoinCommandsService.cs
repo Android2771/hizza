@@ -456,7 +456,7 @@ public class CoinCommandsService
     }
 
     private async Task<long> GetEffectiveBalance(Account account) =>
-        account.Balance - await GetWageredBalance(account);
+        account.DiscordId == "0" ? 99999999999 : account.Balance - await GetWageredBalance(account);
     
     private async Task<long> GetWageredBalance(Account account)
     {

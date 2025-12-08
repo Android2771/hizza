@@ -670,7 +670,7 @@ export async function coinLock(interaction: ChatInputCommandInteraction | undefi
       return;
     }else{
       initiateResponse = await initiateResponseRaw.json();
-      await interaction.reply({content: `You have locked \`${amountToLock}\` for 24 hours!`})
+      await interaction.reply({content: `You have locked \`${amountToLock}\` HizzaCoin for 24 hours!`})
     }
   }
 }

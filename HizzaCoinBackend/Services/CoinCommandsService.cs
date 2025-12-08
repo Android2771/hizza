@@ -361,7 +361,7 @@ public class CoinCommandsService
         switch (GetDestiny())
         {
             case Destiny.Small:
-                if ((isColourRedBet && rouletteNumber is 1 or 3 or 5) || (!isColourRedBet && rouletteNumber is 2 or 4 or 6))
+                if ((isColourRedBet && rouletteNumber is 1 or 3) || (!isColourRedBet && rouletteNumber is 2 or 4))
                 {
                     rouletteNumber++;
                     destinyIntervened = true;
@@ -385,7 +385,7 @@ public class CoinCommandsService
                 }
                 break;
             case Destiny.Insane:
-                if ((isColourRedBet && rouletteNumber is 2 or 4 or 6) || (!isColourRedBet && rouletteNumber is 1 or 3 or 5))
+                if ((isColourRedBet && rouletteNumber is 2 or 4) || (!isColourRedBet && rouletteNumber is 1 or 3))
                 {
                     rouletteNumber++;
                     destinyIntervened = true;

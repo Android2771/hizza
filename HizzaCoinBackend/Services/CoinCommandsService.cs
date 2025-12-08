@@ -214,7 +214,7 @@ public class CoinCommandsService
 
         await _challengesService.CreateAsync(challenge);
 
-        Task.Factory.StartNew(() => { Task.Delay(TimeSpan.FromDays(7)).ContinueWith(t => CancelChallenge(challenge.Id)); });
+        Task.Factory.StartNew(() => { Task.Delay(TimeSpan.FromDays(1)).ContinueWith(t => CancelChallenge(challenge.Id)); });
 
         return challenge;
     }

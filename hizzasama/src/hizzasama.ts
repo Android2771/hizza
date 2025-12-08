@@ -1,6 +1,6 @@
 
 //SYNC COMMANDS
-import { REST, Routes, Client, GatewayIntentBits, Partials, ButtonBuilder, ButtonStyle, ActionRowBuilder, ButtonInteraction, ChatInputCommandInteraction, Interaction, EmbedBuilder } from 'discord.js';
+import { REST, Routes, Client, GatewayIntentBits, Partials, ButtonBuilder, ButtonStyle, ActionRowBuilder, ButtonInteraction, ChatInputCommandInteraction, Interaction, EmbedBuilder, CompressionMethod } from 'discord.js';
 import process from 'process';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -201,6 +201,19 @@ if (process.argv[2]) {
         {
           name: 'amount',
           description: 'The amount of HizzaCoin to give',
+          required: true,
+          type: 4,
+          min_value: 1
+        }
+      ]
+    },
+    {
+      name: 'coinlock',
+      description: 'Lock your hizzacoin for 24 hours if you\'re an addict',
+      options: [
+        {
+          name: 'amount',
+          description: 'The amount of HizzaCoin to lock',
           required: true,
           type: 4,
           min_value: 1
@@ -496,6 +509,7 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     case "coineconomy":       try { await coinEconomy(interaction); }     catch (err) { console.error(err) } break;
     case "coindelete":        try { await coinDelete(interaction); }      catch (err) { console.error(err) } break;
     case "coingive":          try { await coinGive(interaction); }        catch (err) { console.error(err) } break;
+    case "coinlock":          try { await coinLock(interaction); }        catch (err) { console.error(err) } break;
     case "challenge":         try { await challenge(interaction); }       catch (err) { console.error(err) } break;
     case "roll":              try { await roll(interaction); }            catch (err) { console.error(err) } break;
     case "flipcoin":          try { await flipcoin(interaction); }        catch (err) { console.error(err) } break;
@@ -560,7 +574,10 @@ export async function coinBalance(interaction: ChatInputCommandInteraction) {
     const response : CoinBalanceResponse = await (await fetch(`http://localhost:8080/api/coin-commands/coin-balance?discordId=${interaction.options!.get('person') ? interaction.options!.get('person')!.user!.id! : interaction.user.id}`)).json();
     let responseText = "";
     if(interaction.options!.get('person'))
-      responseText += `<@${interaction.options!.get('person')!.user!.id!}> has \`${response.Balance}\` HizzaCoin 🪙`;
+      if(interaction.options!.get('person')!.user!.id! !== "0")
+        responseText += `<@${interaction.options!.get('person')!.user!.id!}> has \`${response.Balance}\` HizzaCoin 🪙`;
+      else
+        responseText += `I have infinite money 🪙🪙🪙`;
     else
       responseText += `You have \`${response.Balance}\` HizzaCoin 🪙`;
 
@@ -638,6 +655,26 @@ export async function coinGive(interaction: ChatInputCommandInteraction | undefi
     return await interaction.reply(`Sent \`${amountToSend}\` HizzaCoin to <@${receiverDiscordId}>!`)
   }
 }
+
+export async function coinLock(interaction: ChatInputCommandInteraction | undefined) {
+  if(interaction){
+    const amountToLock = parseInt((interaction.options!.get('amount')!.value)!.toString());
+
+    if(amountToLock <= 0)
+      return await interaction.reply({content: "You must lock at least 1 HizzaCoin!", ephemeral: true})
+    
+    let initiateResponseRaw = await fetch(`http://localhost:8080/api/coin-commands/initiate-challenge?challengerDiscordId=${interaction.user.id}&challengedDiscordId=${0}&wager=${amountToLock}`);
+    let initiateResponse : Challenge;
+    if(initiateResponseRaw.status !== 200){
+      await interaction.reply({content: "You cannot lock this amount of coin. Do you have enough HizzaCoin?", ephemeral: true})
+      return;
+    }else{
+      initiateResponse = await initiateResponseRaw.json();
+      await interaction.reply({content: `You have locked \`${amountToLock}\` for 24 hours!`})
+    }
+  }
+}
+
 export async function challenge(interaction: ChatInputCommandInteraction) {
   if(interaction){    
     //Challenge initiated logic
@@ -711,6 +748,11 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
             const checkChallengeJson : Challenge = await checkChallenge.json();
             if(checkChallengeJson.State === ChallengeState.Expired){
               await buttonInteraction.reply({content: "This challenge has expired", ephemeral: true});
+              return;
+            }
+
+            if(buttonInteraction.user.id !== checkChallengeJson.ChallengerDiscordId && buttonInteraction.user.id !== checkChallengeJson.ChallengedDiscordId){
+              await buttonInteraction.reply({content: "You are not in this challenge", ephemeral: true});
               return;
             }
           }

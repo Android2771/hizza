@@ -574,7 +574,7 @@ export async function coinBalance(interaction: ChatInputCommandInteraction) {
     const response : CoinBalanceResponse = await (await fetch(`http://localhost:8080/api/coin-commands/coin-balance?discordId=${interaction.options!.get('person') ? interaction.options!.get('person')!.user!.id! : interaction.user.id}`)).json();
     let responseText = "";
     if(interaction.options!.get('person'))
-      if(interaction.options!.get('person')!.user!.id! !== "0")
+      if(interaction.options!.get('person')!.user!.id! !== "0" || interaction.options!.get('person')!.user!.id! !== botId)
         responseText += `<@${interaction.options!.get('person')!.user!.id!}> has \`${response.Balance}\` HizzaCoin 🪙`;
       else
         responseText += `I have infinite money 🪙🪙🪙`;

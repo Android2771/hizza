@@ -66,7 +66,7 @@ public class CoinCommandsService
 
         //Add Multiplier
         var addMultiplier = RandomNumberGenerator.GetInt32(0, 100);
-        var maxMultiplier = claimedReward.RewardedAmount > 0 ? 5 : 15;
+        var maxMultiplier = claimedReward.RewardedAmount > 0 ? 3 : 10;
         switch (GetDestiny())
         {
             case Destiny.Small: 

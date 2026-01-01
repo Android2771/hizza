@@ -65,7 +65,7 @@ public class CoinCommandsService
 
         //Add Multiplier
         var addMultiplier = RandomNumberGenerator.GetInt32(0, 100);
-        var maxMultiplier = claimedReward.RewardedAmount > 0 ? 3 : 15;
+        var maxMultiplier = claimedReward.RewardedAmount > 0 ? 5 : 15;
         switch (GetDestiny())
         {
             case Destiny.Small: 
@@ -85,7 +85,7 @@ public class CoinCommandsService
                 addMultiplier = (int)(addMultiplier / 100);
             break;
         }
-        var multiplier = addMultiplier < 15 ? GetMultiplier(maxMultiplier) : 1;
+        var multiplier = addMultiplier < 100 ? GetMultiplier(maxMultiplier) : 1;
         totalClaim = (int)(totalClaim * multiplier);
 
         account.LastClaimDate = DateTime.UtcNow.Date;

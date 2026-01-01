@@ -555,7 +555,7 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
       if(response.ClaimedReward.RewardedAmount > 0)
         responseText += `\`+${response.ClaimedReward.RewardedAmount}\` Reward for \`${response.ClaimedReward.Streak}\` Streak\n`;
       if(response.Multiplier > 1)
-        responseText += `\`x${response.Multiplier}\` MULTIPLIER! 🪙🪙\n`;
+        responseText += `**END OF YEAR GUARANTEED** \`x${response.Multiplier}\` **MULTIPLIER!** 🪙🪙\n`;
       
       responseText += `\n**TOTAL COIN CLAIMED:** \`${response.TotalClaim}\` 🪙\n`
 

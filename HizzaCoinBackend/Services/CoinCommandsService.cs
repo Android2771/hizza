@@ -12,6 +12,7 @@ public class CoinCommandsService
     private readonly RewardsService _rewardsService;
     private readonly ChallengesService _challengesService;
     private readonly RouletteService _rouletteService;
+    private const int InflationIndex = 3;
 
     public CoinCommandsService(AccountsService accountsService, TransactionsService transactionsService,
         RewardsService rewardsService, ChallengesService challengesService, RouletteService rouletteService)
@@ -49,7 +50,7 @@ public class CoinCommandsService
         }
 
         //Calculate total base claim with streak
-        var baseClaim = GetBaseClaim();
+        var baseClaim = GetBaseClaim() * InflationIndex;
         var nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
         account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) || account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-2) || account.Streak <= 30 ? account.Streak + 1 : 0;
         var totalClaim = baseClaim + Math.Min(account.Streak, 30);
@@ -60,7 +61,7 @@ public class CoinCommandsService
         {
             claimedReward = nextReward;
             nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
-            totalClaim += claimedReward.RewardedAmount;
+            totalClaim += claimedReward.RewardedAmount * InflationIndex;
         }
 
         //Add Multiplier
@@ -85,7 +86,7 @@ public class CoinCommandsService
                 addMultiplier = (int)(addMultiplier / 100);
             break;
         }
-        var multiplier = addMultiplier < 100 ? GetMultiplier(maxMultiplier) : 1;
+        var multiplier = addMultiplier < 15 ? GetMultiplier(maxMultiplier) : 1;
         totalClaim = (int)(totalClaim * multiplier);
 
         account.LastClaimDate = DateTime.UtcNow.Date;

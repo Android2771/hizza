@@ -12,7 +12,7 @@ public class CoinCommandsService
     private readonly RewardsService _rewardsService;
     private readonly ChallengesService _challengesService;
     private readonly RouletteService _rouletteService;
-    private const int InflationIndex = 3;
+    private const int InflationIndex = 5;
 
     public CoinCommandsService(AccountsService accountsService, TransactionsService transactionsService,
         RewardsService rewardsService, ChallengesService challengesService, RouletteService rouletteService)
@@ -61,7 +61,7 @@ public class CoinCommandsService
         {
             claimedReward = nextReward;
             nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
-            totalClaim += claimedReward.RewardedAmount * InflationIndex;
+            totalClaim += claimedReward.RewardedAmount;
         }
 
         //Add Multiplier

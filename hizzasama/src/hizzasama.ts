@@ -313,9 +313,19 @@ if (process.argv[2]) {
       options: [
         {
           name: "red",
-          description: "True if you guess number is red, False if number is black",
+          description: "Guess whether number is red or black.",
           required: true,
-          type: 5
+          type: 3,
+          options: [
+            {
+                name:"Red",
+                "value": "colour_red"
+            },
+            {
+                "name": "Black",
+                "value": "colour_black"
+            }
+          ]
         },
         {
           name: 'wager',
@@ -1015,7 +1025,7 @@ export async function rouletteNumbers(interaction: ChatInputCommandInteraction) 
 
 export async function rouletteColour(interaction: ChatInputCommandInteraction) {
   if(interaction){
-    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-colour?discordId=${interaction.user.id}&isColourRedBet=${interaction.options!.get('red')!.value!}&bet=${interaction.options!.get('wager')!.value!}`)).json();
+    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-colour?discordId=${interaction.user.id}&isColourRedBet=${interaction.options.get('guesscolour')!.value! === 'colour_red'}&bet=${interaction.options!.get('wager')!.value!}`)).json();
     
     let colour = ''
     let redColours = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 13, 25, 27, 30, 32, 34, 36];

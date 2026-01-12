@@ -150,7 +150,7 @@ let player1 = '';
 let player2 = '';
 let whitePlaying : boolean;
 
-const gptGuilds = ["1249401431262232636", "1167198223832723476", "954741402586185778", "841363743957975063", "1278753068669993012"]
+const gptGuilds = ["1"]
 let temperature  = 1.0;
 let max_tokens = 512;
 let chatModel = 'gpt-4-turbo';
@@ -264,30 +264,30 @@ if (process.argv[2]) {
       name: 'destiny',
       description: "I want to know today's destiny."
     },
-    // {
-    //   name: "tell",
-    //   description: "Hizza is now sentient, talk to her",
-    //   options: [
-    //     {
-    //       name: "prompt",
-    //       description: "What to tell hizza",
-    //       required: true,
-    //       type: 3
-    //     }
-    //   ]
-    // },
-    // {
-    //   name: "imagine",
-    //   description: "Hizza generates images now",
-    //   options: [
-    //     {
-    //       name: "prompt",
-    //       description: "What image to generate",
-    //       required: true,
-    //       type: 3
-    //     }
-    //   ]
-    // },
+    {
+      name: "tell",
+      description: "Hizza is now sentient, talk to her",
+      options: [
+        {
+          name: "prompt",
+          description: "What to tell hizza",
+          required: true,
+          type: 3
+        }
+      ]
+    },
+    {
+      name: "imagine",
+      description: "Hizza generates images now",
+      options: [
+        {
+          name: "prompt",
+          description: "What image to generate",
+          required: true,
+          type: 3
+        }
+      ]
+    },
     {
       name: "guessnumbers",
       description: "Guess numbers between 0 and 36 with a chance to win up to x36 your HizzaCoin",
@@ -517,7 +517,7 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     case "destiny":           try { await destiny(interaction); }         catch (err) { console.error(err) } break;
     case "tell":              try { await tell(interaction); }            catch (err) { console.error(err) } break;
     case "imagine":           try { await imagine(interaction); }         catch (err) { console.error(err) } break;
-    case "guessnumbers":    try { await rouletteNumber(interaction); }  catch (err) { console.error(err) } break;
+    case "guessnumbers":    try { await rouletteNumbers(interaction); }  catch (err) { console.error(err) } break;
     case "guesscolour":    try { await rouletteColour(interaction); }  catch (err) { console.error(err) } break;
   }
   if(oldLeaderboard){    
@@ -550,11 +550,12 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
     if(response.BaseClaim === 0)
       responseText = "You have already claimed your coin!";
     else{
-      if(response.Streak > 0)
-        responseText += `\`+${Math.min(response.Streak, 30)}\` Streak ${response.Streak >= 30 ? 'MAX' : 'PROTECTED'}\n`;
+      if(response.Streak > 0 && response.Streak < 100)
+        responseText += `\`+${Math.min(response.Streak, 100)}\` Streak ${response.Streak > 100 ? 'MAX' : response.Streak < 30 ? 'PROTECTED' : ''}\n`;
       if(response.ClaimedReward.RewardedAmount > 0)
         responseText += `\`+${response.ClaimedReward.RewardedAmount}\` Reward for \`${response.ClaimedReward.Streak}\` Streak\n`;
-      
+      if(response.Multiplier > 1)
+        responseText += `\`x${response.Multiplier}\` **MULTIPLIER!** 🪙🪙\n`;
       responseText += `\n**TOTAL COIN CLAIMED:** \`${response.TotalClaim}\` 🪙\n`
 
       if(response.Streak === 30)
@@ -948,8 +949,12 @@ export async function destiny(interaction: ChatInputCommandInteraction) {
   }  
 }
 
-export async function rouletteNumber(interaction: ChatInputCommandInteraction) {
+export async function rouletteNumbers(interaction: ChatInputCommandInteraction) {
   if(interaction){
+      if(getDestinyVal() < 3){
+          await interaction.reply("I don't feel like guess numbers when it's bad destiny! 🐋")
+          return;
+      }
       const takeNumberInputs = (numberInputs : string) : Set<number> => {
         if(!/^(\d+([-–]+\d+)?)(,(\d+([-–]+\d+)?))*$/.test(numberInputs))
             return new Set();
@@ -1022,7 +1027,7 @@ export async function rouletteColour(interaction: ChatInputCommandInteraction) {
       colour = '⚫'
 
     if(response.Payout > 0){
-      await interaction.reply(`You managed to guess the colour of the number \`${response.RouletteNumber}\` ${colour}! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin (x2) ` + (response.DestinyIntervened ? 'thanks to GOOD DESTINY 🐋🪙🐋' : '🪙🪙🪙'))
+      await interaction.reply(`You managed to guess the colour of the number \`${response.RouletteNumber}\` ${colour}! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin ${response.Payout > response.Bet * 2 ? "**(x4 WITH BONUS!)**" : "(x2)"} ` + (response.DestinyIntervened ? 'thanks to GOOD DESTINY 🐋🪙🐋' : '🪙🪙🪙'))
     }else if(response.Bet > 0){
       await interaction.reply(`You did not manage to guess the colour of the number \`${response.RouletteNumber}\` ${colour} and lost \`${response.Bet}\` HizzaCoin` + (response.DestinyIntervened ? " bececause of BAD DESTINY 🐋" : ""))
     }else{

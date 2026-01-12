@@ -1,4 +1,4 @@
-﻿using HizzaCoinBackend.Models;
+using HizzaCoinBackend.Models;
 using HizzaCoinBackend.Models.DTOs;
 using System;
 using System.Security.Cryptography;
@@ -12,7 +12,8 @@ public class CoinCommandsService
     private readonly RewardsService _rewardsService;
     private readonly ChallengesService _challengesService;
     private readonly RouletteService _rouletteService;
-    private const int InflationIndex = 5;
+    private const int CoinClaimInflationIndex = 8;
+    private const int RewardInflationIndex = 3;
 
     public CoinCommandsService(AccountsService accountsService, TransactionsService transactionsService,
         RewardsService rewardsService, ChallengesService challengesService, RouletteService rouletteService)
@@ -50,10 +51,10 @@ public class CoinCommandsService
         }
 
         //Calculate total base claim with streak
-        var baseClaim = GetBaseClaim() * InflationIndex;
+        var baseClaim = GetBaseClaim() * CoinClaimInflationIndex;
         var nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
         account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) || account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-2) || account.Streak <= 30 ? account.Streak + 1 : 0;
-        var totalClaim = baseClaim + Math.Min(account.Streak, 30);
+        var totalClaim = baseClaim + Math.Min(account.Streak, 100);
 
         //Add reward
         var claimedReward = new Reward();
@@ -61,12 +62,12 @@ public class CoinCommandsService
         {
             claimedReward = nextReward;
             nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
-            totalClaim += claimedReward.RewardedAmount;
+            totalClaim += claimedReward.RewardedAmount * RewardInflationIndex;
         }
 
         //Add Multiplier
         var addMultiplier = RandomNumberGenerator.GetInt32(0, 100);
-        var maxMultiplier = claimedReward.RewardedAmount > 0 ? 3 : 10;
+        var maxMultiplier = claimedReward.RewardedAmount > 0 ? 5 : 15;
         switch (GetDestiny())
         {
             case Destiny.Small: 
@@ -83,10 +84,10 @@ public class CoinCommandsService
             break;
             case Destiny.Insane: 
                 maxMultiplier = (int)(maxMultiplier * 1.4);
-                addMultiplier = (int)(addMultiplier / 100);
+                addMultiplier = (int)(addMultiplier / 1.6);
             break;
         }
-        var multiplier = addMultiplier < 15 ? GetMultiplier(maxMultiplier) : 1;
+        var multiplier = addMultiplier < 20 ? GetMultiplier(maxMultiplier) : 1;
         totalClaim = (int)(totalClaim * multiplier);
 
         account.LastClaimDate = DateTime.UtcNow.Date;
@@ -347,7 +348,8 @@ public class CoinCommandsService
     public async Task<RouletteResponse?> RouletteColour(string discordId, bool isColourRedBet, long bet)
     {
         var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);
-        var spoils = bet * 2;
+        
+        var spoils = RandomNumberGenerator.GetInt32(0, 100) < 5 ? bet * 4 : bet * 2;
         var betTransaction = await TakeBet(discordId, bet);
         var destinyIntervened = false;
         
@@ -397,7 +399,7 @@ public class CoinCommandsService
 
         if (rouletteNumber != 0 && (isColourRedBet && redColours.Contains(rouletteNumber) || !isColourRedBet && !redColours.Contains(rouletteNumber)))
         {
-            var rewardTransaction = await PayOutSpoils(discordId, bet * 2);
+            var rewardTransaction = await PayOutSpoils(discordId, spoils);
             if (rewardTransaction.Id != null)
             {
                 roulette.RewardTransactionId = rewardTransaction.Id;

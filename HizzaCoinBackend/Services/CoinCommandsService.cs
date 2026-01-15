@@ -62,12 +62,13 @@ public class CoinCommandsService
         {
             claimedReward = nextReward;
             nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
-            totalClaim += claimedReward.RewardedAmount * RewardInflationIndex;
+            claimedReward.RewardedAmount *= RewardInflationIndex;
+            totalClaim += claimedReward.RewardedAmount;
         }
 
         //Add Multiplier
         var addMultiplier = RandomNumberGenerator.GetInt32(0, 100);
-        var maxMultiplier = claimedReward.RewardedAmount > 0 ? 5 : 15;
+        var maxMultiplier = claimedReward.RewardedAmount > 0 ? 3 : 12;
         switch (GetDestiny())
         {
             case Destiny.Small: 
@@ -349,7 +350,17 @@ public class CoinCommandsService
     {
         var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);
         
-        var spoils = RandomNumberGenerator.GetInt32(0, 100) < 5 ? bet * 4 : bet * 2;
+        var doublePayoutChance = GetDestiny() switch
+        {
+            Destiny.Small => 1,
+            Destiny.Somewhat => 2,
+            Destiny.Big => 3,
+            Destiny.Very => 4,
+            Destiny.Insane => 5,
+            _ => 3
+        };
+
+        var spoils = RandomNumberGenerator.GetInt32(0, 100) < doublePayoutChance ? bet * 4 : bet * 2;
         var betTransaction = await TakeBet(discordId, bet);
         var destinyIntervened = false;
         

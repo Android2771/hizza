@@ -207,19 +207,19 @@ if (process.argv[2]) {
         }
       ]
     },
-    {
-      name: 'coinlock',
-      description: 'Lock your hizzacoin for 24 hours if you\'re an addict',
-      options: [
-        {
-          name: 'amount',
-          description: 'The amount of HizzaCoin to lock',
-          required: true,
-          type: 4,
-          min_value: 1
-        }
-      ]
-    },
+    //{
+    //  name: 'coinlock',
+    //  description: 'Lock your hizzacoin for 24 hours if you\'re an addict',
+    //  options: [
+    //    {
+    //      name: 'amount',
+    //      description: 'The amount of HizzaCoin to lock',
+    //      required: true,
+    //      type: 4,
+    //      min_value: 1
+    //    }
+    //  ]
+    //},
     {
       name: 'challenge',
       description: 'Challenge your foes to rock paper scissors, perhaps with a wager',
@@ -550,7 +550,7 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
     if(response.BaseClaim === 0)
       responseText = "You have already claimed your coin!";
     else{
-      if(response.Streak > 0 && response.Streak < 100)
+      if(response.Streak > 0)
         responseText += `\`+${Math.min(response.Streak, 100)}\` Streak ${response.Streak > 100 ? 'MAX' : response.Streak < 30 ? 'PROTECTED' : ''}\n`;
       if(response.ClaimedReward.RewardedAmount > 0)
         responseText += `\`+${response.ClaimedReward.RewardedAmount}\` Reward for \`${response.ClaimedReward.Streak}\` Streak\n`;

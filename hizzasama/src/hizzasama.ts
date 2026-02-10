@@ -551,7 +551,7 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
       responseText = "You have already claimed your coin!";
     else{
       if(response.Streak > 0)
-        responseText += `\`+${Math.min(response.Streak, 100)}\` Streak ${response.Streak > 100 ? 'MAX' : response.Streak < 30 ? 'PROTECTED' : ''}\n`;
+        responseText += `\`+${response.Streak}\` Streak ${response.Streak < 30 ? 'PROTECTED' : ''}\n`;
       if(response.ClaimedReward.RewardedAmount > 0)
         responseText += `\`+${response.ClaimedReward.RewardedAmount}\` Reward for \`${response.ClaimedReward.Streak}\` Streak\n`;
       if(response.Multiplier > 1)
@@ -1027,9 +1027,9 @@ export async function rouletteColour(interaction: ChatInputCommandInteraction) {
       colour = '⚫'
 
     if(response.Payout > 0){
-      await interaction.reply(`You managed to guess the colour of the number \`${response.RouletteNumber}\` ${colour}! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin ${response.Payout > response.Bet * 2 ? "**(x4 WITH BONUS!)**" : "(x2)"} ` + (response.DestinyIntervened ? 'thanks to GOOD DESTINY 🐋🪙🐋' : '🪙🪙🪙'))
+      await interaction.reply(`You managed to guess the colour of the number \`${response.RouletteNumber}\` ${colour}! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin ${response.Payout > response.Bet * 2 ? "**(x5 WITH BONUS!)**" : "(x2)"} ` + (response.DestinyIntervened ? 'thanks to GOOD DESTINY 🐋🪙🐋' : '🪙🪙🪙'))
     }else if(response.Bet > 0){
-      await interaction.reply(`You did not manage to guess the colour of the number \`${response.RouletteNumber}\` ${colour} and lost \`${response.Bet}\` HizzaCoin` + (response.DestinyIntervened ? " bececause of BAD DESTINY 🐋" : ""))
+      await interaction.reply(`You did not manage to guess the colour of the number \`${response.RouletteNumber}\` ${colour} and lost \`${response.Bet}\` HizzaCoin` + (response.DestinyIntervened ? " because of BAD DESTINY 🐋" : ""))
     }else{
       await interaction.reply(`You do not have enough money to bet! Try \`coin claim\` to get more`)
     }

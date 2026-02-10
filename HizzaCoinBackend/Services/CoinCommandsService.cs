@@ -12,8 +12,8 @@ public class CoinCommandsService
     private readonly RewardsService _rewardsService;
     private readonly ChallengesService _challengesService;
     private readonly RouletteService _rouletteService;
-    private const int CoinClaimInflationIndex = 8;
-    private const int RewardInflationIndex = 3;
+    private const int CoinClaimInflationIndex = 10;
+    private const int RewardInflationIndex = 1;
 
     public CoinCommandsService(AccountsService accountsService, TransactionsService transactionsService,
         RewardsService rewardsService, ChallengesService challengesService, RouletteService rouletteService)
@@ -54,7 +54,7 @@ public class CoinCommandsService
         var baseClaim = GetBaseClaim() * CoinClaimInflationIndex;
         var nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
         account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) || account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-2) || account.Streak <= 30 ? account.Streak + 1 : 0;
-        var totalClaim = baseClaim + Math.Min(account.Streak, 100);
+        var totalClaim = baseClaim + account.Streak;
 
         //Add reward
         var claimedReward = new Reward();
@@ -68,24 +68,24 @@ public class CoinCommandsService
 
         //Add Multiplier
         var addMultiplier = RandomNumberGenerator.GetInt32(0, 100);
-        var maxMultiplier = claimedReward.RewardedAmount > 0 ? 3 : 12;
+        var maxMultiplier = claimedReward.RewardedAmount > 0 ? 3 : 15;
         switch (GetDestiny())
         {
             case Destiny.Small: 
                 maxMultiplier = (int)(maxMultiplier * 0.7); 
-                addMultiplier = (int)(addMultiplier / 0.7); 
+                addMultiplier = (int)(addMultiplier / 0.8); 
             break;
             case Destiny.Somewhat: 
                 maxMultiplier = (int)(maxMultiplier * 0.9); 
                 addMultiplier = (int)(addMultiplier / 0.9); 
             break;
             case Destiny.Very: 
-                maxMultiplier = (int)(maxMultiplier * 1.2);
-                addMultiplier = (int)(addMultiplier / 1.2);
+                maxMultiplier = (int)(maxMultiplier * 1.4);
+                addMultiplier = (int)(addMultiplier / 1.4);
             break;
             case Destiny.Insane: 
-                maxMultiplier = (int)(maxMultiplier * 1.4);
-                addMultiplier = (int)(addMultiplier / 1.6);
+                maxMultiplier = (int)(maxMultiplier * 1.6);
+                addMultiplier = (int)(addMultiplier / 1.8);
             break;
         }
         var multiplier = addMultiplier < 20 ? GetMultiplier(maxMultiplier) : 1;
@@ -360,7 +360,7 @@ public class CoinCommandsService
             _ => 3
         };
 
-        var spoils = RandomNumberGenerator.GetInt32(0, 100) < doublePayoutChance ? bet * 4 : bet * 2;
+        var spoils = RandomNumberGenerator.GetInt32(0, 100) < doublePayoutChance ? bet * 5 : bet * 2;
         var betTransaction = await TakeBet(discordId, bet);
         var destinyIntervened = false;
         

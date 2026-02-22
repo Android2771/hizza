@@ -1027,7 +1027,7 @@ export async function rouletteColour(interaction: ChatInputCommandInteraction) {
       colour = '⚫'
 
     if(response.Payout > 0){
-      await interaction.reply(`You managed to guess the colour of the number \`${response.RouletteNumber}\` ${colour}! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin ${response.Payout > response.Bet * 2 ? "**(x5 WITH BONUS!)**" : "(x2)"} ` + (response.DestinyIntervened ? 'thanks to GOOD DESTINY 🐋🪙🐋' : '🪙🪙🪙'))
+      await interaction.reply(`You managed to guess the colour of the number \`${response.RouletteNumber}\` ${colour}! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin ${response.Payout > response.Bet * 2 ? "**(x10 WITH BONUS!)**" : "(x2)"} ` + (response.DestinyIntervened ? 'thanks to GOOD DESTINY 🐋🪙🐋' : '🪙🪙🪙'))
     }else if(response.Bet > 0){
       await interaction.reply(`You did not manage to guess the colour of the number \`${response.RouletteNumber}\` ${colour} and lost \`${response.Bet}\` HizzaCoin` + (response.DestinyIntervened ? " because of BAD DESTINY 🐋" : ""))
     }else{

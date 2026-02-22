@@ -12,7 +12,7 @@ public class CoinCommandsService
     private readonly RewardsService _rewardsService;
     private readonly ChallengesService _challengesService;
     private readonly RouletteService _rouletteService;
-    private const int CoinClaimInflationIndex = 10;
+    private const int CoinClaimInflationIndex = 30;
     private const int RewardInflationIndex = 1;
 
     public CoinCommandsService(AccountsService accountsService, TransactionsService transactionsService,
@@ -352,15 +352,15 @@ public class CoinCommandsService
         
         var doublePayoutChance = GetDestiny() switch
         {
-            Destiny.Small => 1,
-            Destiny.Somewhat => 2,
-            Destiny.Big => 3,
-            Destiny.Very => 4,
-            Destiny.Insane => 5,
+            Destiny.Small => 0,
+            Destiny.Somewhat => 0,
+            Destiny.Big => 1,
+            Destiny.Very => 2,
+            Destiny.Insane => 3,
             _ => 3
         };
 
-        var spoils = RandomNumberGenerator.GetInt32(0, 100) < doublePayoutChance ? bet * 5 : bet * 2;
+        var spoils = RandomNumberGenerator.GetInt32(0, 100) < doublePayoutChance ? bet * 10 : bet * 2;
         var betTransaction = await TakeBet(discordId, bet);
         var destinyIntervened = false;
         

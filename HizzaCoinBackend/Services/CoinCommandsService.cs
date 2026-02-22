@@ -12,8 +12,8 @@ public class CoinCommandsService
     private readonly RewardsService _rewardsService;
     private readonly ChallengesService _challengesService;
     private readonly RouletteService _rouletteService;
-    private const int CoinClaimInflationIndex = 30;
-    private const int RewardInflationIndex = 1;
+    private const int CoinClaimInflationIndex = 50;
+    private const int RewardInflationIndex = 3;
 
     public CoinCommandsService(AccountsService accountsService, TransactionsService transactionsService,
         RewardsService rewardsService, ChallengesService challengesService, RouletteService rouletteService)
@@ -68,7 +68,7 @@ public class CoinCommandsService
 
         //Add Multiplier
         var addMultiplier = RandomNumberGenerator.GetInt32(0, 100);
-        var maxMultiplier = claimedReward.RewardedAmount > 0 ? 3 : 15;
+        var maxMultiplier = claimedReward.RewardedAmount > 0 ? 5 : 30;
         switch (GetDestiny())
         {
             case Destiny.Small: 
@@ -88,7 +88,7 @@ public class CoinCommandsService
                 addMultiplier = (int)(addMultiplier / 1.8);
             break;
         }
-        var multiplier = addMultiplier < 20 ? GetMultiplier(maxMultiplier) : 1;
+        var multiplier = addMultiplier < 10 ? GetMultiplier(maxMultiplier) : 1;
         totalClaim = (int)(totalClaim * multiplier);
 
         account.LastClaimDate = DateTime.UtcNow.Date;
@@ -350,17 +350,19 @@ public class CoinCommandsService
     {
         var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);
         
-        var doublePayoutChance = GetDestiny() switch
+        var multiplePayoutChance = GetDestiny() switch
         {
-            Destiny.Small => 0,
-            Destiny.Somewhat => 0,
-            Destiny.Big => 1,
-            Destiny.Very => 2,
-            Destiny.Insane => 3,
-            _ => 3
+            Destiny.Small => 1,
+            Destiny.Somewhat => 2,
+            Destiny.Big => 3,
+            Destiny.Very => 4,
+            Destiny.Insane => 5,
+            _ => -1
         };
 
-        var spoils = RandomNumberGenerator.GetInt32(0, 100) < doublePayoutChance ? bet * 10 : bet * 2;
+        var multiplePayoutAmount = multiplePayoutChance * 3;
+
+        var spoils = RandomNumberGenerator.GetInt32(0, 100) < multiplePayoutChance ? bet * multiplePayoutAmount : bet * 2;
         var betTransaction = await TakeBet(discordId, bet);
         var destinyIntervened = false;
         
@@ -375,13 +377,6 @@ public class CoinCommandsService
         switch (GetDestiny())
         {
             case Destiny.Small:
-                if ((isColourRedBet && rouletteNumber is 1 or 3) || (!isColourRedBet && rouletteNumber is 2 or 4))
-                {
-                    rouletteNumber++;
-                    destinyIntervened = true;
-                    roulette.RolledNumber = rouletteNumber;
-                }
-                break;
             case Destiny.Somewhat:
                 if ((isColourRedBet && rouletteNumber == 1) || (!isColourRedBet && rouletteNumber == 2))
                 {
@@ -390,16 +385,9 @@ public class CoinCommandsService
                     roulette.RolledNumber = rouletteNumber;
                 }
                 break;
-            case Destiny.Very:
-                if ((isColourRedBet && rouletteNumber == 2) || (!isColourRedBet && rouletteNumber == 1))
-                {
-                    rouletteNumber++;
-                    destinyIntervened = true;
-                    roulette.RolledNumber = rouletteNumber;
-                }
-                break;
+            case Destiny.Very: 
             case Destiny.Insane:
-                if ((isColourRedBet && rouletteNumber is 2 or 4) || (!isColourRedBet && rouletteNumber is 1 or 3))
+                if ((isColourRedBet && rouletteNumber == 2) || (!isColourRedBet && rouletteNumber == 1))
                 {
                     rouletteNumber++;
                     destinyIntervened = true;

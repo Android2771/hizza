@@ -107,6 +107,8 @@ const client = new Client(
 
 let sandbox = {};
 
+let noMultiplier : { [key: string]: number } = {}
+
 let legacyCommands : {[id: string] : (arg0: any) => void} = {
     "howlong": message => {
       if (message.author.id === "225676494007959562" || message.author.id === "236478857849339905")
@@ -552,10 +554,22 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
         responseText += `\`+${response.Streak}\` Streak ${response.Streak < 30 ? 'PROTECTED' : ''}\n`;
       if(response.ClaimedReward.RewardedAmount > 0)
         responseText += `\`+${response.ClaimedReward.RewardedAmount}\` Reward for \`${response.ClaimedReward.Streak}\` Streak\n`;
-      if(response.Multiplier > 1)
+      if(response.Multiplier > 1){
         responseText += `\`x${response.Multiplier}\` **MULTIPLIER!** 🪙🪙\n`;
-      else if(interaction.user.id === "299245756064464898")
-	responseText += "No multiplier :( \n";
+        noMultiplier[interaction.user!.id!] = 0;
+      }
+      else{
+        if(!noMultiplier[interaction.user!.id!]){
+          noMultiplier[interaction.user!.id!] = 1;
+        }
+	      responseText += "No multiplier :";
+
+        for(let i = 0; i <= noMultiplier[interaction.user!.id!]; i++){
+          responseText += "(";
+        }
+
+        responseText += " \n";
+      }
 
       responseText += `\n**TOTAL COIN CLAIMED:** \`${response.TotalClaim}\` 🪙\n`
 

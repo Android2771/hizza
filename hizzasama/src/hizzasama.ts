@@ -560,9 +560,10 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
       }
       else{
         if(!noMultiplier[interaction.user!.id!]){
-          noMultiplier[interaction.user!.id!] = 1;
+          noMultiplier[interaction.user!.id!] = 0;
         }
-	      responseText += "No multiplier :";
+	responseText += "No multiplier :";
+        noMultiplier[interaction.user!.id!] = noMultiplier[interaction.user!.id!] + 1;
 
         for(let i = 0; i <= noMultiplier[interaction.user!.id!]; i++){
           responseText += "(";

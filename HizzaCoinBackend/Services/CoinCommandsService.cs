@@ -53,7 +53,7 @@ public class CoinCommandsService
         //Calculate total base claim with streak
         var baseClaim = GetBaseClaim() * CoinClaimInflationIndex;
         var nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
-        account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) || account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-2) || account.Streak <= 30 ? account.Streak + 1 : 0;
+        account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) || account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-2) || account.Streak <= 30 || account.LastClaimDate == new DateTime(2026, 4, 21) ? account.Streak + 1 : 0;
         var totalClaim = baseClaim + account.Streak;
 
         //Add reward

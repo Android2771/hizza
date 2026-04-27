@@ -113,8 +113,6 @@ let legacyCommands : {[id: string] : (arg0: any) => void} = {
           message.channel.send(`Drea and Cath have been dating for \`${((Date.now() - (new Date(2020, 1, 21).valueOf())) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
       else if (message.author.id === "183577847418322944" || message.author.id === "148455623313326080")
           message.channel.send(`Andy Pandy and Nasi Poo have been dating for \`${((Date.now() - (new Date(2021, 7, 7)).valueOf()) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
-      else if (message.author.id === "586278312809201665" || message.author.id === "196171123019218944")
-      message.channel.send(`Anne and Chad have been dating for \`${((Date.now() - (new Date(2022, 11, 27)).valueOf()) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
     },
 
     "FUNNY": message => {message.channel.send("THE BIG LAUGH");},
@@ -556,6 +554,9 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
         responseText += `\`+${response.ClaimedReward.RewardedAmount}\` Reward for \`${response.ClaimedReward.Streak}\` Streak\n`;
       if(response.Multiplier > 1)
         responseText += `\`x${response.Multiplier}\` **MULTIPLIER!** 🪙🪙\n`;
+      else if(interaction.user.id === "299245756064464898")
+	responseText += "No multiplier :( \n";
+
       responseText += `\n**TOTAL COIN CLAIMED:** \`${response.TotalClaim}\` 🪙\n`
 
       if(response.Streak === 30)
@@ -951,10 +952,6 @@ export async function destiny(interaction: ChatInputCommandInteraction) {
 
 export async function rouletteNumbers(interaction: ChatInputCommandInteraction) {
   if(interaction){
-      if(getDestinyVal() < 3){
-          await interaction.reply("I don't feel like guess numbers when it's bad destiny! 🐋")
-          return;
-      }
       const takeNumberInputs = (numberInputs : string) : Set<number> => {
         if(!/^(\d+([-–]+\d+)?)(,(\d+([-–]+\d+)?))*$/.test(numberInputs))
             return new Set();

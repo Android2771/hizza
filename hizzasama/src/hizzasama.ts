@@ -92,6 +92,9 @@ const openai = new OpenAI({
 const botId = atob(token!.split('.')[0]);
 const usernameCache: { [key: string]: string } = {}
 
+let totalClaimed : number = 0;
+let totalClaims : number = 0;
+
 const client = new Client(
   {
     intents: [GatewayIntentBits.DirectMessages,
@@ -550,6 +553,9 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
     if(response.BaseClaim === 0)
       responseText = "You have already claimed your coin!";
     else{
+      totalClaimed += response.TotalClaim;
+      totalClaims++;
+
       if(response.Streak > 0)
         responseText += `\`+${response.Streak}\` Streak ${response.Streak < 30 ? 'PROTECTED' : ''}\n`;
       if(response.ClaimedReward.RewardedAmount > 0)
@@ -565,14 +571,22 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
 	responseText += "No multiplier :";
         noMultiplier[interaction.user!.id!] = noMultiplier[interaction.user!.id!] + 1;
 
-        for(let i = 0; i <= noMultiplier[interaction.user!.id!]; i++){
+        for(let i = 0; i < noMultiplier[interaction.user!.id!]; i++){
           responseText += "(";
         }
 
         responseText += " \n";
       }
 
-      responseText += `\n**TOTAL COIN CLAIMED:** \`${response.TotalClaim}\` 🪙\n`
+      responseText += `\n**TOTAL COIN CLAIMED:** \`${response.TotalClaim}\` 🪙 `
+      if((response.TotalClaim / 3) > (totalClaimed / totalClaims))
+        responseText += "🔥🔥🔥🔥🔥"
+      else if((response.TotalClaim / 2) > (totalClaimed / totalClaims))
+        responseText += "🔥🔥🔥"
+      else if((response.TotalClaim) > (totalClaimed / totalClaims))
+        responseText += "🔥"
+      
+      responseText += " \n";
 
       if(response.Streak === 30)
         responseText += `\n**YOUR STREAK IS NOT PROTECTED ANYMORE, CLAIM EVERYDAY TO KEEP YOUR STREAK!**\n\n`

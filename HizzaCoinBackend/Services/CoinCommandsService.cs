@@ -12,8 +12,8 @@ public class CoinCommandsService
     private readonly RewardsService _rewardsService;
     private readonly ChallengesService _challengesService;
     private readonly RouletteService _rouletteService;
-    private const int CoinClaimInflationIndex = 50;
-    private const int RewardInflationIndex = 3;
+    private const int CoinClaimInflationIndex = 100;
+    private const int RewardInflationIndex = 5;
 
     public CoinCommandsService(AccountsService accountsService, TransactionsService transactionsService,
         RewardsService rewardsService, ChallengesService challengesService, RouletteService rouletteService)
@@ -422,15 +422,28 @@ public class CoinCommandsService
 
     private long GetBaseClaim()
     {
-        return GetDestiny() switch
+        var baseClaim = GetDestiny() switch
         {
-            Destiny.Small => 15,
-            Destiny.Somewhat => 30,
-            Destiny.Big => 40,
-            Destiny.Very => 50,
-            Destiny.Insane => 70,
+            Destiny.Small => 15L,
+            Destiny.Somewhat => 30L,
+            Destiny.Big => 40L,
+            Destiny.Very => 50L,
+            Destiny.Insane => 70L,
             _ => 2
         };
+
+        var variation = RandomNumberGenerator.GetInt32(1, 401) / 100.0;
+        var increase = RandomNumberGenerator.GetInt32(0, 2) == 1;
+        if (increase)
+        {
+            baseClaim += (long)(baseClaim * variation);
+        }
+        else
+        {
+            baseClaim -= (long)(baseClaim * variation) / 8;
+        }
+
+        return baseClaim;
     }
 
     private Destiny GetDestiny()

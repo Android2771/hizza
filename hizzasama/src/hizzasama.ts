@@ -94,6 +94,22 @@ const usernameCache: { [key: string]: string } = {}
 
 let totalClaimed : number = 0;
 let totalClaims : number = 0;
+let noMultiplier : { [key: string]: number } = {}
+let chess : any;
+let commandsExecuted = 0;
+let chessOngoing = false;
+let player1 = '';
+let player2 = '';
+let whitePlaying : boolean;
+const gptGuilds = ["1"]
+let temperature  = 1.0;
+let max_tokens = 512;
+let chatModel = 'gpt-4-turbo';
+let imageModel = 'dall-e-2';
+let behaviour = "";
+let top_p = 1;
+let counter = 0;
+let lastCounter = "";
 
 const client = new Client(
   {
@@ -110,8 +126,6 @@ const client = new Client(
 
 let sandbox = {};
 
-let noMultiplier : { [key: string]: number } = {}
-
 let legacyCommands : {[id: string] : (arg0: any) => void} = {
     "howlong": message => {
       if (message.author.id === "225676494007959562" || message.author.id === "236478857849339905")
@@ -119,7 +133,6 @@ let legacyCommands : {[id: string] : (arg0: any) => void} = {
       else if (message.author.id === "183577847418322944" || message.author.id === "148455623313326080")
           message.channel.send(`Andy Pandy and Nasi Poo have been dating for \`${((Date.now() - (new Date(2021, 7, 7)).valueOf()) / 1000 / 60 / 60 / 24 / 365.25).toFixed(5)}\` years!`)
     },
-
     "FUNNY": message => {message.channel.send("THE BIG LAUGH");},
     "tay": message => {message.channel.send("I LOVE TAYLOR SWIFT 🤩😛🤯😍😱");},
     "big destiny": message => {message.react("🐳")},
@@ -144,22 +157,6 @@ let legacyCommands : {[id: string] : (arg0: any) => void} = {
       message.react("🇳")
     }
   }
-
-let chess : any;
-let commandsExecuted = 0;
-
-let chessOngoing = false;
-let player1 = '';
-let player2 = '';
-let whitePlaying : boolean;
-
-const gptGuilds = ["1"]
-let temperature  = 1.0;
-let max_tokens = 512;
-let chatModel = 'gpt-4-turbo';
-let imageModel = 'dall-e-2';
-let behaviour = "";
-let top_p = 1;
 
 if (process.argv[2]) {
   const commands = [
@@ -354,6 +351,23 @@ client.on("messageCreate", async (message : any) => {
   OUTER_LOOP: {
     if (message.author.id === botId || message.author.id === '255240051573653505' || message.author.id === "341911947366891531")
       break OUTER_LOOP
+
+    if (message.channel.name === "counter" && /^\d+$/.test(message.content)) {
+      const enteredNumber = parseInt(message.content)
+      if(message.author.id != lastCounter){
+        if(!isNaN(enteredNumber) && enteredNumber > 0 && enteredNumber <= Number.MAX_SAFE_INTEGER && enteredNumber === counter + 1){
+          counter++;
+          message.react('✅')
+        }else if(counter !== 0){
+          let lastGoodNumber = counter;
+          message.react('❌')
+          message.channel.send(`You made it to \`${lastGoodNumber}\`!`);
+          counter = 0;
+        }
+
+        lastCounter = message.author.id ;
+      }
+    }
 
     if (message.channel.name === "chess") {
       if (!chessOngoing) {
@@ -561,7 +575,7 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
       if(response.ClaimedReward.RewardedAmount > 0)
         responseText += `\`+${response.ClaimedReward.RewardedAmount}\` Reward for \`${response.ClaimedReward.Streak}\` Streak\n`;
       if(response.Multiplier > 1){
-        responseText += `\`x${response.Multiplier}\` **MULTIPLIER!** 🪙🪙\n`;
+        responseText += `\`x${response.Multiplier}\` ${response.Streak > 0 && response.Streak % 365 === 0 ? 'GUARANTEED YEAR ANNIVERSARY ' : ''} **MULTIPLIER!** 🪙🪙\n`;
         noMultiplier[interaction.user!.id!] = 0;
       }
       else{

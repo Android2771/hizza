@@ -12,8 +12,7 @@ public class CoinCommandsService
     private readonly RewardsService _rewardsService;
     private readonly ChallengesService _challengesService;
     private readonly RouletteService _rouletteService;
-    private const int CoinClaimInflationIndex = 100;
-    private const int RewardInflationIndex = 5;
+    private const int CoinClaimInflationIndex = 60;
 
     public CoinCommandsService(AccountsService accountsService, TransactionsService transactionsService,
         RewardsService rewardsService, ChallengesService challengesService, RouletteService rouletteService)
@@ -51,7 +50,7 @@ public class CoinCommandsService
         }
 
         //Calculate total base claim with streak
-        var baseClaim = GetBaseClaim() * CoinClaimInflationIndex;
+        var baseClaim = GetBaseClaim() * CoinClaimInflationIndex * 5;
         var nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
         account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) || account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-2) || account.Streak <= 30 || account.LastClaimDate == new DateTime(2026, 4, 21) ? account.Streak + 1 : 0;
         var totalClaim = baseClaim + account.Streak;
@@ -62,13 +61,13 @@ public class CoinCommandsService
         {
             claimedReward = nextReward;
             nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
-            claimedReward.RewardedAmount *= RewardInflationIndex;
+            claimedReward.RewardedAmount *= CoinClaimInflationIndex;
             totalClaim += claimedReward.RewardedAmount;
         }
 
         //Add Multiplier
         var addMultiplier = RandomNumberGenerator.GetInt32(0, 100);
-        var maxMultiplier = claimedReward.RewardedAmount > 0 ? 5 : 30;
+        var maxMultiplier = claimedReward.RewardedAmount > 0 ? 3 : 30;
         switch (GetDestiny())
         {
             case Destiny.Small: 
@@ -88,7 +87,7 @@ public class CoinCommandsService
                 addMultiplier = (int)(addMultiplier / 1.8);
             break;
         }
-        var multiplier = addMultiplier < 10 ? GetMultiplier(maxMultiplier) : 1;
+        var multiplier = addMultiplier < 10 || account.Streak % 365 == 0 ? GetMultiplier(maxMultiplier) : 1;
         totalClaim = (int)(totalClaim * multiplier);
 
         account.LastClaimDate = DateTime.UtcNow.Date;

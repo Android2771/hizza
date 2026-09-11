@@ -1044,9 +1044,9 @@ export async function rouletteNumbers(interaction: ChatInputCommandInteraction) 
     const allNumberInputsString = [...processedInput].toString();
     const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-number?discordId=${interaction.user.id}&numberBets=${allNumberInputsString}&bet=${interaction.options!.get('wager')!.value!}`)).json();
     if(response.Payout > 0){
-      await interaction.reply(`You managed to guess the number \`${response.RouletteNumber}\`! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin (\`x${reward}\`) 🪙🪙🪙!`)
+      await interaction.reply(`You managed to guess the number \`${response.RouletteNumber}\`! Your \`${response.Bet.toLocaleString()}\` bet turned to \`${response.Payout.toLocaleString()}\` HizzaCoin (\`x${reward}\`) 🪙🪙🪙!`)
     }else if(response.Bet > 0){
-      await interaction.reply(`You did not manage to guess the number \`${response.RouletteNumber}\` and lost \`${response.Bet}\` HizzaCoin`)
+      await interaction.reply(`You did not manage to guess the number \`${response.RouletteNumber}\` and lost \`${response.Bet.toLocaleString()}\` HizzaCoin`)
     }else{
       await interaction.reply(`You do not have enough money to bet! Try \`coin claim\` to get more`)
     }
@@ -1067,9 +1067,9 @@ export async function rouletteColour(interaction: ChatInputCommandInteraction) {
       colour = '⚫'
 
     if(response.Payout > 0){
-      await interaction.reply(`You managed to guess the colour of the number \`${response.RouletteNumber}\` ${colour}! Your \`${response.Bet}\` bet turned to \`${response.Payout}\` HizzaCoin ${response.Payout > response.Bet * 2 ? `**(x${response.Payout / response.Bet} WITH BONUS!)**` : "(x2)"} ` + (response.DestinyIntervened ? 'thanks to GOOD DESTINY 🐋🪙🐋' : '🪙🪙🪙'))
+      await interaction.reply(`You managed to guess the colour of the number \`${response.RouletteNumber}\` ${colour}! Your \`${response.Bet.toLocaleString()}\` bet turned to \`${response.Payout.toLocaleString()}\` HizzaCoin ${response.Payout > response.Bet * 2 ? `**(x${response.Payout / response.Bet} WITH BONUS!)**` : "(x2)"} ` + (response.DestinyIntervened ? 'thanks to GOOD DESTINY 🐋🪙🐋' : '🪙🪙🪙'))
     }else if(response.Bet > 0){
-      await interaction.reply(`You did not manage to guess the colour of the number \`${response.RouletteNumber}\` ${colour} and lost \`${response.Bet}\` HizzaCoin` + (response.DestinyIntervened ? " because of BAD DESTINY 🐋" : ""))
+      await interaction.reply(`You did not manage to guess the colour of the number \`${response.RouletteNumber}\` ${colour} and lost \`${response.Bet.toLocaleString()}\` HizzaCoin` + (response.DestinyIntervened ? " because of BAD DESTINY 🐋" : ""))
     }else{
       await interaction.reply(`You do not have enough money to bet! Try \`coin claim\` to get more`)
     }

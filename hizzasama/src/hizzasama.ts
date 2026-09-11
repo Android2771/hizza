@@ -573,7 +573,7 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
       if(response.Streak > 0)
         responseText += `\`+${response.Streak}\` Streak ${response.Streak < 30 ? 'PROTECTED' : ''}\n`;
       if(response.ClaimedReward.RewardedAmount > 0)
-        responseText += `\`+${response.ClaimedReward.RewardedAmount}\` Reward for \`${response.ClaimedReward.Streak}\` Streak\n`;
+        responseText += `\`+${response.ClaimedReward.RewardedAmount.toLocaleString()}\` Reward for \`${response.ClaimedReward.Streak}\` Streak\n`;
       if(response.Multiplier > 1){
         responseText += `\`x${response.Multiplier}\` ${response.Streak > 0 && response.Streak % 365 === 0 ? 'GUARANTEED YEAR ANNIVERSARY ' : ''} **MULTIPLIER!** 🪙🪙\n`;
         noMultiplier[interaction.user!.id!] = 0;
@@ -622,10 +622,10 @@ export async function coinBalance(interaction: ChatInputCommandInteraction) {
       else
         responseText += `I have infinite money 🪙🪙🪙`;
     else
-      responseText += `You have \`${response.Balance}\` HizzaCoin 🪙`;
+      responseText += `You have \`${response.Balance.toLocaleString()}\` HizzaCoin 🪙`;
 
     if(response.WageredBalance > 0)
-      responseText += `  (\`${response.WageredBalance}\` of which is reserved)`
+      responseText += `  (\`${response.WageredBalance.toLocaleString()}\` of which is reserved)`
 
     await interaction.reply(responseText);
   }

@@ -8,6 +8,5 @@ public class StatisticsResponse
         WageredBalance = wageredBalance;
     }
 
-    public long Balance { get; set; }
-    public long WageredBalance { get; set; }
+    public long 
 }

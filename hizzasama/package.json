@@ -1,6 +1,6 @@
 {
   "name": "hizza_sama",
-  "version": "2.0.0",
+  "version": "3.1.0",
   "type": "module",
   "description": "Hizza-Sama bot for discord",
   "main": "hizzasama.js",

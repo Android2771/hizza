@@ -24,7 +24,8 @@ public class StatisticsService
         var roulettesWon = await _transactionsService.GetBetsWon();
         var hizzaCoin = (await _accountsService.GetAsync()).Sum(account => account.Balance);
         var accounts = await _accountsService.GetCount();
+        var activeAccounts = await _accountsService.GetActiveUsers();
 
-        return new StatisticsResponse(claims, challenges, gives, roulettesPlaced, roulettesWon, hizzaCoin, accounts);
+        return new StatisticsResponse(claims, challenges, gives, roulettesPlaced, roulettesWon, hizzaCoin, accounts, activeAccounts);
     }
 }

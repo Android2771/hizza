@@ -15,6 +15,8 @@ public class AccountsService
 
     public async Task<List<Account>> GetAsync() =>
         await _accountsCollection.Find(account => true).ToListAsync();
+    public async Task<long> GetActiveUsers() =>
+        await _accountsCollection.Find(account => account.LastClaimDate == DateTime.UtcNow.Date || account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) || account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-2)).CountDocumentsAsync();
 
     public async Task<long> GetCount() =>
         await _accountsCollection.Find(account => true).CountDocumentsAsync();

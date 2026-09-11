@@ -82,9 +82,6 @@ export interface Challenge {
   State: ChallengeState;
 }
 
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 const token = process.env["DISCORD_BOT_TOKEN"];
 const openai = new OpenAI({
   apiKey: process.env["OPEN_AI_KEY"],
@@ -207,19 +204,6 @@ if (process.argv[2]) {
         }
       ]
     },
-    //{
-    //  name: 'coinlock',
-    //  description: 'Lock your hizzacoin for 24 hours if you\'re an addict',
-    //  options: [
-    //    {
-    //      name: 'amount',
-    //      description: 'The amount of HizzaCoin to lock',
-    //      required: true,
-    //      type: 4,
-    //      min_value: 1
-    //    }
-    //  ]
-    //},
     {
       name: 'challenge',
       description: 'Challenge your foes to rock paper scissors, perhaps with a wager',

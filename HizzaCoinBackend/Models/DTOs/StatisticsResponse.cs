@@ -2,7 +2,7 @@
 
 public class StatisticsResponse
 {
-    public StatisticsResponse(long claims, long challenges, long gives, long roulettesPlaced, long roulettesWon, long hizzaCoin, long accounts)
+    public StatisticsResponse(long claims, long challenges, long gives, long roulettesPlaced, long roulettesWon, long hizzaCoin, long accounts, long activeAccounts)
     {
         Claims = claims;
         Challenges = challenges;
@@ -11,6 +11,7 @@ public class StatisticsResponse
         RoulettesWon = roulettesWon;
         HizzaCoin = hizzaCoin;
         Accounts = accounts;
+        ActiveAccounts = activeAccounts;
     }
 
     public long Claims { get; set; }
@@ -21,4 +22,5 @@ public class StatisticsResponse
     public long RoulettesWon { get; set; }
     public long HizzaCoin { get; set; }
     public long Accounts { get; set; }
+    public long ActiveAccounts { get; set; }
 }

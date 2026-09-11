@@ -72,3 +72,4 @@ invocation.json
 yarn.lock
 .env
 *.user
+*.json

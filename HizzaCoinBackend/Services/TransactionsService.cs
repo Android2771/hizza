@@ -26,6 +26,7 @@ public class TransactionsService
     
     public async Task<long> GetClaimsMade() =>
         await _transactionsCollection.Find(transaction => transaction.TransactionType == TransactionType.Claim).CountDocumentsAsync();
+    
     public async Task<long> GetExchangesMade() =>
         await _transactionsCollection.Find(transaction => transaction.TransactionType == TransactionType.Give).CountDocumentsAsync();
 

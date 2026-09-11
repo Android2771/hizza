@@ -7,8 +7,7 @@ services:
       no_cache: true
     image: hizzasama-frontend
     volumes:
-      - ./resources:/hizzasama/resources
-      - ./screen/resources:/screen/resources
+      - ./hizzasama/resources:/hizzasama/resources
     restart: unless-stopped
     network_mode: host
     depends_on:

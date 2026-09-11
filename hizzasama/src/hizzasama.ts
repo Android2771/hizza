@@ -1,15 +1,16 @@
 
 //SYNC COMMANDS
-import { REST, Routes, Client, GatewayIntentBits, Partials, ButtonBuilder, ButtonStyle, ActionRowBuilder, ButtonInteraction, ChatInputCommandInteraction, Interaction, EmbedBuilder, CompressionMethod } from 'discord.js';
+import { REST, Routes, Client, GatewayIntentBits, Partials, ButtonBuilder, ButtonStyle, ActionRowBuilder, ButtonInteraction, ChatInputCommandInteraction, Interaction, EmbedBuilder } from 'discord.js';
 import process from 'process';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import fetch from "node-fetch";
 import { Chess } from 'chess.js'
 import { execSync } from 'child_process';
 import 'dotenv/config';
 import OpenAI from "openai";
 import puppeteer  from 'puppeteer';
+import { readFile, writeFile } from 'fs/promises';
+
+const STATE_FILE = '/hizzasama/resources/state.json';
 
 interface Account {
   Id: string | null;
@@ -89,24 +90,71 @@ const openai = new OpenAI({
 const botId = atob(token!.split('.')[0]);
 const usernameCache: { [key: string]: string } = {}
 
-let totalClaimed : number = 0;
-let totalClaims : number = 0;
-let noMultiplier : { [key: string]: number } = {}
-let chess : any;
-let commandsExecuted = 0;
-let chessOngoing = false;
-let player1 = '';
-let player2 = '';
-let whitePlaying : boolean;
-const gptGuilds = ["1"]
-let temperature  = 1.0;
-let max_tokens = 512;
-let chatModel = 'gpt-4-turbo';
-let imageModel = 'dall-e-2';
-let behaviour = "";
-let top_p = 1;
-let counter = 0;
-let lastCounter = "";
+let chess = new Chess();
+
+let state = {
+  totalClaimed: 0,
+  totalClaims: 0,
+  noMultiplier: {} as { [key: string]: number },
+  commandsExecuted: 0,
+
+  chessOngoing: false,
+  chessFen: '',
+  player1: '',
+  player2: '',
+  whitePlaying: false,
+
+  gptGuilds: ['1'],
+
+  temperature: 1.0,
+  max_tokens: 512,
+  chatModel: 'gpt-4-turbo',
+  imageModel: 'dall-e-2',
+  behaviour: '',
+  top_p: 1,
+
+  counter: 0,
+  lastCounter: ''
+}
+
+async function saveState(): Promise<void> {
+  try {
+    state.chessFen = chess.fen();
+
+    await writeFile(
+      STATE_FILE,
+      JSON.stringify(state, null, 2),
+      'utf-8'
+    );
+
+    console.log('State saved.');
+  } catch (error) {
+    console.error('Failed to save state:', error);
+  }
+}
+
+async function loadState(): Promise<void> {
+  try {
+    const data = await readFile(STATE_FILE, 'utf-8');
+    const savedState = JSON.parse(data);
+
+    Object.assign(state, savedState);
+
+    chess = new Chess(savedState.chessFen);
+
+    console.log('State loaded.');
+  } catch (error: any) {
+    if (error.code === 'ENOENT') {
+      console.log('No saved state found, using defaults.');
+    } else {
+      console.error('Failed to load state:', error);
+    }
+  } finally {
+    setInterval(async () => {
+      await saveState();
+    }, 5000);
+  }
+}
 
 const client = new Client(
   {
@@ -119,9 +167,7 @@ const client = new Client(
     GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.GuildPresences
     ], partials: [Partials.Channel]
-  })
-
-let sandbox = {};
+  });
 
 let legacyCommands : {[id: string] : (arg0: any) => void} = {
     "howlong": message => {
@@ -326,8 +372,9 @@ if (process.argv[2]) {
   })();
 }
 
-client.on('ready', () => {
+client.on('ready', async () => {
   console.log(`Logged in as ${client.user?.tag}!`);
+  await loadState();
 });
 
 client.on("messageCreate", async (message : any) => {
@@ -338,64 +385,64 @@ client.on("messageCreate", async (message : any) => {
 
     if (message.channel.name === "counter" && /^\d+$/.test(message.content)) {
       const enteredNumber = parseInt(message.content)
-      if(message.author.id != lastCounter){
-        if(!isNaN(enteredNumber) && enteredNumber > 0 && enteredNumber <= Number.MAX_SAFE_INTEGER && enteredNumber === counter + 1){
-          counter++;
+      if(message.author.id != state.lastCounter){
+        if(!isNaN(enteredNumber) && enteredNumber > 0 && enteredNumber <= Number.MAX_SAFE_INTEGER && enteredNumber === state.counter + 1){
+          state.counter++;
           message.react('✅')
-        }else if(counter !== 0){
-          let lastGoodNumber = counter;
+        }else if(state.counter !== 0){
+          let lastGoodNumber = state.counter;
           message.react('❌')
           message.channel.send(`You made it to \`${lastGoodNumber}\`!`);
-          counter = 0;
+          state.counter = 0;
         }
 
-        lastCounter = message.author.id ;
+        state.lastCounter = message.author.id ;
       }
     }
 
     if (message.channel.name === "chess") {
-      if (!chessOngoing) {
-        if (message.content.startsWith("challenge ") && player1 === '' && player2 === '' && message.content.split(' ').length === 2 && message.content.endsWith('>')) {
-          player1 = message.author.id;
+      if (!state.chessOngoing) {
+        if (message.content.startsWith("challenge ") && state.player1 === '' && state.player2 === '' && message.content.split(' ').length === 2 && message.content.endsWith('>')) {
+          state.player1 = message.author.id;
           let start = message.content[2] === '!' ? 3 : 2
-          player2 = message.content.substr("challenge ".length + start, "183577847418322944".length)
+          state.player2 = message.content.substr("challenge ".length + start, "183577847418322944".length)
           setTimeout(() => {
-            if (!chessOngoing) {
-              player1 = ''
-              player2 = ''
+            if (!state.chessOngoing) {
+              state.player1 = ''
+              state.player2 = ''
               message.react('⏰')
             }
           }, 3600000);
-          if (player1 !== player2)
+          if (state.player1 !== state.player2)
             message.react("👌")
           else {
-            player1 = ''
-            player2 = ''
+            state.player1 = ''
+            state.player2 = ''
           }
-        } else if (message.content === "accept" && message.author.id === player2) {
-          chessOngoing = true;
-          whitePlaying = true;
+        } else if (message.content === "accept" && message.author.id === state.player2) {
+          state.chessOngoing = true;
+          state.whitePlaying = true;
           chess = new Chess();
           message.channel.send(`https://chessboardimage.com/${encodeURI(chess.fen())}.png`);
           message.react("👌")
-        } else if (message.content === "reject" && message.author.id === player2) {
-          player1 = ''
-          player2 = ''
+        } else if (message.content === "reject" && message.author.id === state.player2) {
+          state.player1 = ''
+          state.player2 = ''
         }
       } else {
         if (message.content === "forfeit") {
           chess = new Chess();
-          player1 = ''
-          player2 = ''
-          chessOngoing = false;
+          state.player1 = ''
+          state.player2 = ''
+          state.chessOngoing = false;
           message.react("🚩")
           break OUTER_LOOP
-        } else if ((whitePlaying && message.author.id === player1) || (!whitePlaying && message.author.id === player2)) {
+        } else if ((state.whitePlaying && message.author.id === state.player1) || (!state.whitePlaying && message.author.id === state.player2)) {
           if (chess.move(message.content)) {
-            message.channel.send(whitePlaying ? `https://chessboardimage.com/${encodeURI(chess.fen())}-flip.png` : `https://chessboardimage.com/${encodeURI(chess.fen())}.png`);
+            message.channel.send(state.whitePlaying ? `https://chessboardimage.com/${encodeURI(chess.fen())}-flip.png` : `https://chessboardimage.com/${encodeURI(chess.fen())}.png`);
             if (chess.game_over()) {
               if (chess.in_checkmate())
-                if (whitePlaying)
+                if (state.whitePlaying)
                   message.react("🤍")
                 else
                   message.react("🖤")
@@ -404,14 +451,14 @@ client.on("messageCreate", async (message : any) => {
                 message.react("🖤")
               }
               chess = new Chess();
-              player1 = ''
-              player2 = ''
-              chessOngoing = false;
+              state.player1 = ''
+              state.player2 = ''
+              state.chessOngoing = false;
               break OUTER_LOOP
             }
             if (chess.in_check())
               message.react("🚩")
-            whitePlaying = !whitePlaying;
+            state.whitePlaying = !state.whitePlaying;
             message.react("👌")
           } else {
             message.react("❌")
@@ -484,7 +531,7 @@ client.on("messageCreate", async (message : any) => {
 client.on('interactionCreate', async (interaction: Interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
-  commandsExecuted++;
+  state.commandsExecuted++;
   
   let oldLeaderboard : Account[] = [];
   if(interaction.commandName.startsWith("coin") || interaction.commandName.startsWith("guess") || interaction.commandName === "challenge"){
@@ -533,7 +580,7 @@ client.on('interactionCreate', async (interaction: Interaction) => {
 
     for(let i = 0; i < newLeaderboard.length && i < oldLeaderboard.length; i++){  
       //Update medal for leaderboard place changes or if first command
-      if(oldLeaderboard[i].DiscordId !== newLeaderboard[i].DiscordId || commandsExecuted === 1){
+      if(oldLeaderboard[i].DiscordId !== newLeaderboard[i].DiscordId || state.commandsExecuted === 1){
         setTimeout(() => {
             updateMedal(newLeaderboard[i].DiscordId, i+1);
         }, i * 2000)
@@ -551,8 +598,8 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
     if(response.BaseClaim === 0)
       responseText = "You have already claimed your coin!";
     else{
-      totalClaimed += response.TotalClaim;
-      totalClaims++;
+      state.totalClaimed += response.TotalClaim;
+      state.totalClaims++;
 
       if(response.Streak > 0)
         responseText += `\`+${response.Streak}\` Streak ${response.Streak < 30 ? 'PROTECTED' : ''}\n`;
@@ -560,16 +607,16 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
         responseText += `\`+${response.ClaimedReward.RewardedAmount.toLocaleString()}\` Reward for \`${response.ClaimedReward.Streak}\` Streak\n`;
       if(response.Multiplier > 1){
         responseText += `\`x${response.Multiplier}\` ${response.Streak > 0 && response.Streak % 365 === 0 ? 'GUARANTEED YEAR ANNIVERSARY ' : ''} **MULTIPLIER!** 🪙🪙\n`;
-        noMultiplier[interaction.user!.id!] = 0;
+        state.noMultiplier[interaction.user!.id!] = 0;
       }
       else{
-        if(!noMultiplier[interaction.user!.id!]){
-          noMultiplier[interaction.user!.id!] = 0;
+        if(!state.noMultiplier[interaction.user!.id!]){
+          state.noMultiplier[interaction.user!.id!] = 0;
         }
 	responseText += "No multiplier :";
-        noMultiplier[interaction.user!.id!] = noMultiplier[interaction.user!.id!] + 1;
+        state.noMultiplier[interaction.user!.id!] = state.noMultiplier[interaction.user!.id!] + 1;
 
-        for(let i = 0; i < noMultiplier[interaction.user!.id!]; i++){
+        for(let i = 0; i < state.noMultiplier[interaction.user!.id!]; i++){
           responseText += "(";
         }
 
@@ -577,11 +624,11 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
       }
 
       responseText += `\n**TOTAL COIN CLAIMED:** \`${response.TotalClaim}\` 🪙 `
-      if((response.TotalClaim / 3) > (totalClaimed / totalClaims))
+      if((response.TotalClaim / 3) > (state.totalClaimed / state.totalClaims))
         responseText += "🔥🔥🔥🔥🔥"
-      else if((response.TotalClaim / 2) > (totalClaimed / totalClaims))
+      else if((response.TotalClaim / 2) > (state.totalClaimed / state.totalClaims))
         responseText += "🔥🔥🔥"
-      else if((response.TotalClaim) > (totalClaimed / totalClaims))
+      else if((response.TotalClaim) > (state.totalClaimed / state.totalClaims))
         responseText += "🔥"
       
       responseText += " \n";
@@ -852,7 +899,7 @@ export async function tell(interaction: ChatInputCommandInteraction){
   if(interaction){  
     const prompt = interaction.options!.get('prompt')!.value!.toString()
     await interaction.deferReply();
-    if(gptGuilds.includes(interaction.guildId!)){
+    if(state.gptGuilds.includes(interaction.guildId!)){
       try{
         const params: OpenAI.Chat.ChatCompletionCreateParams = {
           messages: [            
@@ -861,7 +908,7 @@ export async function tell(interaction: ChatInputCommandInteraction){
               content: [
                 {
                   "type": "text",
-                  "text": "Limit your response to a maximum of three sentences and " + behaviour
+                  "text": "Limit your response to a maximum of three sentences and " + state.behaviour
                 }
               ]
             },
@@ -872,10 +919,10 @@ export async function tell(interaction: ChatInputCommandInteraction){
                 "text": prompt
               }
             ]}],
-          model: chatModel,
-          max_tokens,
-          temperature,
-          top_p,
+          model: state.chatModel,
+          max_tokens: state.max_tokens,
+          temperature: state.temperature,
+          top_p: state.top_p,
           stream: false,   
                
         };
@@ -900,10 +947,10 @@ export async function imagine(interaction: ChatInputCommandInteraction){
     const prompt = interaction.options!.get('prompt')!.value!.toString()
     await interaction.deferReply();
 
-    if(gptGuilds.includes(interaction.guildId!)){
+    if(state.gptGuilds.includes(interaction.guildId!)){
       try{
         const response = await openai.images.generate({
-        model: imageModel,
+        model: state.imageModel,
         prompt,
         n: 1,
         size: "1024x1024",

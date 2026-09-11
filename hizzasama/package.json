@@ -24,7 +24,7 @@
     "dotenv": "^16.3.1",
     "node-fetch": "^2.6.7",
     "openai": "^4.19.0",
-    "puppeteer": "^23.5.0"
+    "puppeteer": "^25.10.0"
   },
   "devDependencies": {
     "@types/chess.js": "^0.13.7",

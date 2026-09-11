@@ -35,8 +35,6 @@ builder.Services.AddOpenApiDocument(settings =>
     settings.DocumentName = "v1";
 });
 
-builder.Services.AddOpenApi();
-
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

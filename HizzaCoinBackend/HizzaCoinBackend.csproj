@@ -8,10 +8,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.6"/>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-        <PackageReference Include="MongoDB.Driver" Version="3.4.0" />
-        <PackageReference Include="NSwag.AspNetCore" Version="14.4.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.0" />
+        <PackageReference Include="MongoDB.Driver" Version="3.11.2" />
+        <PackageReference Include="NSwag.AspNetCore" Version="14.7.1" />
     </ItemGroup>
 
     <ItemGroup>

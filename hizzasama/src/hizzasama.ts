@@ -562,7 +562,7 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
   if(interaction){  
     const response : CoinClaimResponse = await (await fetch(`http://localhost:8080/api/coin-commands/coin-claim?discordId=${interaction.user.id}`)).json();
     
-    let responseText = `<@${interaction.user.id}> CLAIMED \`${response["BaseClaim"]}\` COIN!\n`
+    let responseText = `<@${interaction.user.id}> CLAIMED \`${response["BaseClaim"].toLocaleString()}\` COIN!\n`
 
     if(response.BaseClaim === 0)
       responseText = "You have already claimed your coin!";
@@ -618,7 +618,7 @@ export async function coinBalance(interaction: ChatInputCommandInteraction) {
     let responseText = "";
     if(interaction.options!.get('person'))
       if(interaction.options!.get('person')!.user!.id! !== "0" || interaction.options!.get('person')!.user!.id! !== botId)
-        responseText += `<@${interaction.options!.get('person')!.user!.id!}> has \`${response.Balance}\` HizzaCoin 🪙`;
+        responseText += `<@${interaction.options!.get('person')!.user!.id!}> has \`${response.Balance.toLocaleString()}\` HizzaCoin 🪙`;
       else
         responseText += `I have infinite money 🪙🪙🪙`;
     else
@@ -639,7 +639,7 @@ export async function coinLeaderboard(interaction: ChatInputCommandInteraction) 
     let leaderboardText = "**...................  LeaderBoard  ....................**\n";
     for(let i = 0; i < response.length; i++){
       let username = await fetchUsername(response[i].DiscordId);
-      leaderboardText += `${i < 3 ? ["🥇", "🥈", "🥉"][i] : i+1+")"} **${username.padEnd(15, " ")}** with **${response[i].Balance.toString().padStart(5, " ")}** HizzaCoin\n`;
+      leaderboardText += `${i < 3 ? ["🥇", "🥈", "🥉"][i] : i+1+")"} **${username.padEnd(15, " ")}** with **${response[i].Balance.toLocaleString().padStart(5, " ")}** HizzaCoin\n`;
     };
     
     await interaction.editReply(leaderboardText);
@@ -666,8 +666,8 @@ export async function coinEconomy(interaction: ChatInputCommandInteraction) {
     if(response === null){
       responseText = "Use 'coin claim' to get some HizzaCoin and unlock more info"
     }else{
-      responseText += `🍕 HizzaCoin in Circulation: \`${response.TotalHizzaCoinAmount}\`\n`
-      responseText += `🔢 Total HizzaCoin Accounts: \`${response.TotalHizzaCoinAccounts}\`\n`
+      responseText += `🍕 HizzaCoin in Circulation: \`${response.TotalHizzaCoinAmount.toLocaleString()}\`\n`
+      responseText += `🔢 Total HizzaCoin Accounts: \`${response.TotalHizzaCoinAccounts.toLocaleString()}\`\n`
       responseText += `📊 Your place on the LeaderBoard: \`${response.LeaderboardPlace}\`\n`
       responseText += `🥧 You own: \`${response.PercentageEconomy}\`% of the economy\n`
     }
@@ -695,7 +695,7 @@ export async function coinGive(interaction: ChatInputCommandInteraction | undefi
     const response = await (await fetch(`http://localhost:8080/api/coin-commands/coin-give?senderDiscordId=${senderDiscordId}&receiverDiscordId=${receiverDiscordId}&amountToSend=${amountToSend}`)).json();
     if(response.status === 400 || !response)
       return await interaction.reply({content: "You do not have enough HizzaCoin to perform this action! Try `coin claim` to get more", ephemeral: true})
-    return await interaction.reply(`Sent \`${amountToSend}\` HizzaCoin to <@${receiverDiscordId}>!`)
+    return await interaction.reply(`Sent \`${amountToSend.toLocaleString()}\` HizzaCoin to <@${receiverDiscordId}>!`)
   }
 }
 
@@ -773,7 +773,7 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
         .addComponents(rock, paper, scissors, decline);
 
         await interaction.reply({
-          content: `${wager ? '🪙🪙🪙' : ''} <@${opponent!.user!.id}> has been challenged by <@${interaction.user.id}>` + (wager ? ` with a **${wager} HizzaCoin wager** 🪙🪙🪙!` : `!`),
+          content: `${wager ? '🪙🪙🪙' : ''} <@${opponent!.user!.id}> has been challenged by <@${interaction.user.id}>` + (wager ? ` with a **${wager.toLocaleString()} HizzaCoin wager** 🪙🪙🪙!` : `!`),
           components: [responseRow],
         });
 
@@ -837,7 +837,7 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
             case ChallengeState.PlayerOneWin:
               winMsg = `<@${challenge.ChallengerDiscordId}> ${emotes[challenge.ChallengerHand - 1]} beat <@${challenge.ChallengedDiscordId}> ${emotes[challenge.ChallengedHand - 1]}!`
               if(wager){
-                winMsg = winMsg + `\n And has won ${wager} HizzaCoin! 🪙`      
+                winMsg = winMsg + `\n And has won ${wager.toLocaleString()} HizzaCoin! 🪙`      
               }
 
               await buttonInteraction.reply(winMsg);
@@ -845,7 +845,7 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
             case ChallengeState.PlayerTwoWin:
               winMsg = `<@${challenge.ChallengedDiscordId}> ${emotes[challenge.ChallengedHand - 1]} beat <@${challenge.ChallengerDiscordId}> ${emotes[challenge.ChallengerHand - 1]}!`
               if(wager){
-                winMsg = winMsg + `\n And has won ${wager} HizzaCoin! 🪙`      
+                winMsg = winMsg + `\n And has won ${wager.toLocaleString()} HizzaCoin! 🪙`      
               }
 
               await buttonInteraction.reply(winMsg);

@@ -15,6 +15,9 @@ public class AccountsService
 
     public async Task<List<Account>> GetAsync() =>
         await _accountsCollection.Find(account => true).ToListAsync();
+
+    public async Task<long> GetCount() =>
+        await _accountsCollection.Find(account => true).CountDocumentsAsync();
     
     public async Task<Account?> GetAsync(string id) =>
         await _accountsCollection.Find(account => account.Id == id).FirstOrDefaultAsync();

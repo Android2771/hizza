@@ -6,6 +6,7 @@ db.createCollection("Accounts")
 db.createCollection("Transactions")
 db.createCollection("Challenges")
 db.createCollection("Rewards")
+db.createCollection("FrontendState")
 
 db.Accounts.insertMany([
   { DiscordId: "252190585597853707", Balance: 1146, ReservedBalance: 0, LastClaimDate: ISODate("2025-06-29T00:00:00Z"), Streak: 0 },

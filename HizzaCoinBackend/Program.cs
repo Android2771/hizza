@@ -22,6 +22,7 @@ builder.Services.AddSingleton<ChallengesService>();
 builder.Services.AddSingleton<TransactionsService>();
 builder.Services.AddSingleton<RewardsService>();
 builder.Services.AddSingleton<RouletteService>();
+builder.Services.AddSingleton<StatisticsService>();
 builder.Services.AddSingleton<CoinCommandsService>();
 
 builder.Services.AddControllers()

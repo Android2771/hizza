@@ -1,8 +1,8 @@
 ﻿namespace HizzaCoinBackend.Models.DTOs;
 
-public class CoinBalanceResponse
+public class StatisticsResponse
 {
-    public CoinBalanceResponse(long balance, long wageredBalance)
+    public StatisticsResponse(long balance, long wageredBalance)
     {
         Balance = balance;
         WageredBalance = wageredBalance;

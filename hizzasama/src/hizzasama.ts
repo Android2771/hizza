@@ -140,7 +140,15 @@ async function loadState(): Promise<void> {
 
     Object.assign(state, savedState);
 
-    chess = new Chess(savedState.chessFen);
+    if(!state.chessOngoing){  
+      state.chessFen = ''
+      state.player1 = ''
+      state.player2 = ''
+      state.whitePlaying = false
+    }else{
+      chess = new Chess(savedState.chessFen);
+    }
+
 
     console.log('State loaded.');
   } catch (error: any) {

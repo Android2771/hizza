@@ -402,7 +402,7 @@ client.on("messageCreate", async (message : any) => {
 
     if (message.channel.name === "chess") {
       if (!state.chessOngoing) {
-        if (message.content.startsWith("challenge ") && state.player1 === '' && state.player2 === '' && message.content.split(' ').length === 2 && message.content.endsWith('>')) {
+        if (message.content.toLowerCase().startsWith("challenge ") && state.player1 === '' && state.player2 === '' && message.content.split(' ').length === 2 && message.content.endsWith('>')) {
           state.player1 = message.author.id;
           let start = message.content[2] === '!' ? 3 : 2
           state.player2 = message.content.substr("challenge ".length + start, "183577847418322944".length)
@@ -419,18 +419,19 @@ client.on("messageCreate", async (message : any) => {
             state.player1 = ''
             state.player2 = ''
           }
-        } else if (message.content === "accept" && message.author.id === state.player2) {
+        } else if (message.content.toLowerCase() === "accept" && message.author.id === state.player2) {
           state.chessOngoing = true;
           state.whitePlaying = true;
           chess = new Chess();
           message.channel.send(`https://chessboardimage.com/${encodeURI(chess.fen())}.png`);
           message.react("👌")
-        } else if (message.content === "reject" && message.author.id === state.player2) {
+        } else if (message.content.toLowerCase() === "reject" && message.author.id === state.player2) {
+          message.react("👌")
           state.player1 = ''
           state.player2 = ''
         }
       } else {
-        if (message.content === "forfeit") {
+        if (message.content.toLowerCase() === "forfeit") {
           chess = new Chess();
           state.player1 = ''
           state.player2 = ''
@@ -623,7 +624,7 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
         responseText += " \n";
       }
 
-      responseText += `\n**TOTAL COIN CLAIMED:** \`${response.TotalClaim}\` 🪙 `
+      responseText += `\n**TOTAL COIN CLAIMED:** \`${response.TotalClaim.toLocaleString()}\` 🪙 `
       if((response.TotalClaim / 3) > (state.totalClaimed / state.totalClaims))
         responseText += "🔥🔥🔥🔥🔥"
       else if((response.TotalClaim / 2) > (state.totalClaimed / state.totalClaims))

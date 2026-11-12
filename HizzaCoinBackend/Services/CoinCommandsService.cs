@@ -12,7 +12,7 @@ public class CoinCommandsService
     private readonly RewardsService _rewardsService;
     private readonly ChallengesService _challengesService;
     private readonly RouletteService _rouletteService;
-    private const int CoinClaimInflationIndex = 1000;
+    private const int CoinClaimInflationIndex = 10000;
 
     public CoinCommandsService(AccountsService accountsService, TransactionsService transactionsService,
         RewardsService rewardsService, ChallengesService challengesService, RouletteService rouletteService)

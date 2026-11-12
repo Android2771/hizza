@@ -364,7 +364,7 @@ public class CoinCommandsService
             _ => -1
         };
 
-        var multiplePayoutAmount = multiplePayoutChance * 3;
+        var multiplePayoutAmount = multiplePayoutChance * 10;
 
         var spoils = RandomNumberGenerator.GetInt32(0, 100) < multiplePayoutChance ? bet * multiplePayoutAmount : bet * 2;
         var betTransaction = await TakeBet(discordId, bet);

@@ -1,41 +1,43 @@
 using HizzaCoinBackend.Models;
 using HizzaCoinBackend.Models.DTOs;
-using System;
-using System.Security.Cryptography;
 
 namespace HizzaCoinBackend.Services;
 
-public class CoinCommandsService
+public class CoinCommandsService : ICoinCommandsService
 {
-    private readonly AccountsService _accountsService;
-    private readonly TransactionsService _transactionsService;
-    private readonly RewardsService _rewardsService;
-    private readonly ChallengesService _challengesService;
-    private readonly RouletteService _rouletteService;
+    private readonly IAccountsService _accountsService;
+    private readonly ITransactionsService _transactionsService;
+    private readonly IRewardsService _rewardsService;
+    private readonly IChallengesService _challengesService;
+    private readonly IRouletteService _rouletteService;
+    private readonly ICoinRandomSource _randomSource;
+    private readonly TimeProvider _timeProvider;
+    private readonly IDestinyProvider _destinyProvider;
     private const int CoinClaimInflationIndex = 250;
 
-    public CoinCommandsService(AccountsService accountsService, TransactionsService transactionsService,
-        RewardsService rewardsService, ChallengesService challengesService, RouletteService rouletteService)
+    public CoinCommandsService(IAccountsService accountsService, ITransactionsService transactionsService,
+        IRewardsService rewardsService, IChallengesService challengesService, IRouletteService rouletteService,
+        ICoinRandomSource randomSource, TimeProvider timeProvider, IDestinyProvider destinyProvider)
     {
         _accountsService = accountsService;
         _transactionsService = transactionsService;
         _rewardsService = rewardsService;
         _challengesService = challengesService;
         _rouletteService = rouletteService;
+        _randomSource = randomSource;
+        _timeProvider = timeProvider;
+        _destinyProvider = destinyProvider;
     }
 
     public async Task<CoinClaimResponse?> CoinClaim(string discordId)
     {
         //Search for account, if not create one
-        var account = await _accountsService.GetAsyncByDiscordId(discordId);
-        var newAccount = account == null;
-        if (newAccount)
-        {
-            account = new Account(discordId, 0, 0, DateTime.MinValue, 0);
-        }
+        var storedAccount = await _accountsService.GetAsyncByDiscordId(discordId);
+        var newAccount = storedAccount == null;
+        var account = storedAccount ?? new Account(discordId, 0, 0, DateTime.MinValue, 0);
 
         //Check whether last claim was today
-        if (account == null || account.LastClaimDate == DateTime.UtcNow.Date)
+        if (account.LastClaimDate == _timeProvider.GetUtcNow().UtcDateTime.Date)
         {
             return new CoinClaimResponse(
                 discordId,
@@ -52,7 +54,8 @@ public class CoinCommandsService
         //Calculate total base claim with streak
         var baseClaim = GetBaseClaim() * CoinClaimInflationIndex * 5;
         var nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
-        account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) || account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-2) || account.Streak <= 30 || account.LastClaimDate == new DateTime(2026, 4, 21) ? account.Streak + 1 : 0;
+        var claimDate = _timeProvider.GetUtcNow().UtcDateTime.Date;
+        account.Streak = account.LastClaimDate == claimDate.AddDays(-1) || account.LastClaimDate == claimDate.AddDays(-2) || account.Streak <= 30 || account.LastClaimDate == new DateTime(2026, 4, 21) ? account.Streak + 1 : 0;
         var totalClaim = baseClaim + account.Streak;
 
         //Add reward
@@ -66,9 +69,9 @@ public class CoinCommandsService
         }
 
         //Add Multiplier
-        var addMultiplier = RandomNumberGenerator.GetInt32(0, 100);
+        var addMultiplier = _randomSource.GetInt32(0, 100);
         var maxMultiplier = claimedReward.RewardedAmount > 0 ? 3 : 30;
-        switch (GetDestiny())
+        switch (_destinyProvider.GetDestiny())
         {
             case Destiny.Small: 
                 maxMultiplier = (int)(maxMultiplier * 0.7); 
@@ -90,7 +93,7 @@ public class CoinCommandsService
         var multiplier = addMultiplier < 10 || account.Streak % 365 == 0 ? GetMultiplier(maxMultiplier) : 1;
         totalClaim = (int)(totalClaim * multiplier);
 
-        account.LastClaimDate = DateTime.UtcNow.Date;
+        account.LastClaimDate = _timeProvider.GetUtcNow().UtcDateTime.Date;
         account.Balance += totalClaim;
 
         //Add to account and create transaction
@@ -98,7 +101,7 @@ public class CoinCommandsService
             "0",
             discordId,
             totalClaim,
-            DateTime.Now,
+            _timeProvider.GetLocalNow().DateTime,
             TransactionType.Claim
         );
 
@@ -169,7 +172,7 @@ public class CoinCommandsService
             return new Transaction();
 
         var effectiveBalance = senderAccount.DiscordId == "0" ? amountToSend : senderAccount.Balance - await GetWageredBalance(senderAccount);
-        if (senderAccount.Id == null || receiverAccount?.Id == null || effectiveBalance < amountToSend ||
+        if (senderAccount.Id == null || receiverAccount.Id == null || effectiveBalance < amountToSend ||
             receiverAccount.Id == senderAccount.Id)
             return new Transaction();
 
@@ -180,7 +183,7 @@ public class CoinCommandsService
             senderDiscordId,
             receiverDiscordId,
             amountToSend,
-            DateTime.Now,
+            _timeProvider.GetLocalNow().DateTime,
             isBet ? TransactionType.Roulette : TransactionType.Give
         );
 
@@ -209,7 +212,7 @@ public class CoinCommandsService
         Challenge challenge = new Challenge(challengerAccount.DiscordId,
             challengedAccount.DiscordId,
             wager,
-            DateTime.Now,
+            _timeProvider.GetLocalNow().DateTime,
             Hand.NotSelected,
             Hand.NotSelected,
             ChallengeState.InProgress);
@@ -264,7 +267,7 @@ public class CoinCommandsService
                         challenge.ChallengedDiscordId,
                         challenge.ChallengerDiscordId,
                         challenge.Wager,
-                        DateTime.Now,
+                        _timeProvider.GetLocalNow().DateTime,
                         TransactionType.Challenge
                     );
                     break;
@@ -276,7 +279,7 @@ public class CoinCommandsService
                         challenge.ChallengerDiscordId,
                         challenge.ChallengedDiscordId,
                         challenge.Wager,
-                        DateTime.Now,
+                        _timeProvider.GetLocalNow().DateTime,
                         TransactionType.Challenge
                     );
                     break;
@@ -314,7 +317,7 @@ public class CoinCommandsService
             numberBetInts.Add(Convert.ToInt64(numberBetString));
         }
         
-        var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);
+        var rouletteNumber = _randomSource.GetInt32(0, 37);
         var spoils = (long)(bet * Math.Round(Math.Pow((double)numberBetInts.Count / 36, -1), 2));
         spoils = spoils < bet ? bet : spoils;
         
@@ -347,9 +350,9 @@ public class CoinCommandsService
     }
     public async Task<RouletteResponse?> RouletteColour(string discordId, bool isColourRedBet, long bet)
     {
-        var rouletteNumber = RandomNumberGenerator.GetInt32(0, 37);
+        var rouletteNumber = _randomSource.GetInt32(0, 37);
         
-        var multiplePayoutChance = GetDestiny() switch
+        var multiplePayoutChance = _destinyProvider.GetDestiny() switch
         {
             Destiny.Small => 1,
             Destiny.Somewhat => 2,
@@ -361,7 +364,7 @@ public class CoinCommandsService
 
         var multiplePayoutAmount = multiplePayoutChance * 3;
 
-        var spoils = RandomNumberGenerator.GetInt32(0, 100) < multiplePayoutChance ? bet * multiplePayoutAmount : bet * 2;
+        var spoils = _randomSource.GetInt32(0, 100) < multiplePayoutChance ? bet * multiplePayoutAmount : bet * 2;
         var betTransaction = await TakeBet(discordId, bet);
         var destinyIntervened = false;
         
@@ -373,7 +376,7 @@ public class CoinCommandsService
 
         int[] redColours = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 13, 25, 27, 30, 32, 34, 36];
         
-        switch (GetDestiny())
+        switch (_destinyProvider.GetDestiny())
         {
             case Destiny.Small:
             case Destiny.Somewhat:
@@ -421,7 +424,7 @@ public class CoinCommandsService
 
     private long GetBaseClaim()
     {
-        var baseClaim = GetDestiny() switch
+        var baseClaim = _destinyProvider.GetDestiny() switch
         {
             Destiny.Small => 15L,
             Destiny.Somewhat => 30L,
@@ -431,8 +434,8 @@ public class CoinCommandsService
             _ => 2
         };
 
-        var variation = RandomNumberGenerator.GetInt32(1, 401) / 100.0;
-        var increase = RandomNumberGenerator.GetInt32(0, 2) == 1;
+        var variation = _randomSource.GetInt32(1, 401) / 100.0;
+        var increase = _randomSource.GetInt32(0, 2) == 1;
         if (increase)
         {
             baseClaim += (long)(baseClaim * variation);
@@ -445,27 +448,9 @@ public class CoinCommandsService
         return baseClaim;
     }
 
-    private Destiny GetDestiny()
-    {
-        DateTime date = DateTime.Now;
-        long seed = date.Day + date.Month - 1;
-
-        if (seed % 3 == 0 || seed % 5 == 0)
-            return Destiny.Big;
-        if (seed % 17 == 0)
-            return Destiny.Insane;
-        if (seed % 4 == 0 || seed % 7 == 0)
-            return Destiny.Somewhat;
-        if (seed % 2 == 1)
-            return Destiny.Very;
-
-        return Destiny.Small;
-    }
-
     private double GetMultiplier(double max)
     {
-        Random rand = new Random();
-        double randomValue = 1.1 + rand.NextDouble() * (max - 1.1);
+        double randomValue = 1.1 + _randomSource.NextDouble() * (max - 1.1);
         return Math.Round(randomValue, 2);
     }
 

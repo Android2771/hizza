@@ -17,17 +17,17 @@ sudo ./get-docker.sh
 rm get-docker.sh
 ```
 
-To build and run hizza with python modules:
+To build and run Hizza with Docker Compose:
 ```
 sudo docker compose up -d
 ```
 
 ## How to Install Hizza (Manually)
-* `npm install` to install the required packages
-* `tsc` to compile hizza, or `tsc --watch` to compile everytime `hizzasama.ts` changes
+* `npm ci` to install the locked package versions
+* `npm run build` to compile Hizza, or `npx tsc --watch -p tsconfig.json` to recompile on changes
 
 ## How to Run (Manually)
-* `node hizzasama.js` to run the bot normally
+* `node src/hizzasama.js` to run the bot normally
 
 ## How to Use
 * After inviting the bot to your server, try executing the `commands` command

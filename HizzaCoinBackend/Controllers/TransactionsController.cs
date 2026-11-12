@@ -8,9 +8,9 @@ namespace HizzaCoinBackend.Controllers;
 [Route("api/transactions")]
 public class TransactionsController : ControllerBase
 {
-    private readonly TransactionsService _transactionsService;
+    private readonly ITransactionsService _transactionsService;
     
-    public TransactionsController(TransactionsService transactionsService) =>
+    public TransactionsController(ITransactionsService transactionsService) =>
         _transactionsService = transactionsService;
 
     [HttpGet]

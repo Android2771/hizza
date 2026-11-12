@@ -8,9 +8,9 @@ namespace HizzaCoinBackend.Controllers;
 [Route("api/challenges")]
 public class ChallengesController : ControllerBase
 {
-    private readonly ChallengesService _challengesService;
+    private readonly IChallengesService _challengesService;
     
-    public ChallengesController(ChallengesService challengesService) =>
+    public ChallengesController(IChallengesService challengesService) =>
         _challengesService = challengesService;
 
     [HttpGet]

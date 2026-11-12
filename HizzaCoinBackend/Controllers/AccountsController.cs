@@ -8,9 +8,9 @@ namespace HizzaCoinBackend.Controllers;
 [Route("api/accounts")]
 public class AccountsController : ControllerBase
 {
-    private readonly AccountsService _accountsService;
+    private readonly IAccountsService _accountsService;
     
-    public AccountsController(AccountsService accountsService) =>
+    public AccountsController(IAccountsService accountsService) =>
         _accountsService = accountsService;
 
     [HttpGet]

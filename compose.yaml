@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile
       no_cache: true
     image: hizzasama-frontend
+    env_file:
+      - ./hizzasama/.env
     volumes:
       - ./hizzasama/resources:/hizzasama/resources
     restart: unless-stopped
@@ -25,7 +27,7 @@ services:
     network_mode: host
 
   hizzacoin-database:
-    image: mongodb/mongodb-community-server:latest
+    image: mongodb/mongodb-community-server:8.0.38
     container_name: hizzacoin-database
     volumes:
       - ./mongo-data:/data/db

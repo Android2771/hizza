@@ -1,17 +1,18 @@
-FROM node:alpine
+FROM node:24-alpine
 
 WORKDIR /hizzasama
 
-COPY src ./src
-COPY .env .
-COPY package.json .
-COPY package-lock.json .
-COPY tsconfig.json .
+RUN apk add --no-cache chromium
 
-RUN apk add chromium
-RUN npm install
-RUN npm install typescript -g
-RUN tsc
+ENV PUPPETEER_SKIP_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+COPY package.json package-lock.json ./
+RUN npm ci --ignore-scripts
+
+COPY src ./src
+COPY tsconfig.json ./
+RUN npm run build && npm prune --omit=dev
 
 CMD ["node", "/hizzasama/src/hizzasama.js", "--refresh-commands"]
 #CMD ["node", "/hizzasama/src/hizzasama.js"]

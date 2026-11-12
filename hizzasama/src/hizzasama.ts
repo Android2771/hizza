@@ -2,13 +2,21 @@
 //SYNC COMMANDS
 import { REST, Routes, Client, GatewayIntentBits, Partials, ButtonBuilder, ButtonStyle, ActionRowBuilder, ButtonInteraction, ChatInputCommandInteraction, Interaction, EmbedBuilder } from 'discord.js';
 import process from 'process';
-import fetch from "node-fetch";
 import { Chess } from 'chess.js'
 import { execSync } from 'child_process';
 import 'dotenv/config';
 import OpenAI from "openai";
 import puppeteer  from 'puppeteer';
 import { readFile, writeFile } from 'fs/promises';
+
+async function parseJson<T>(response: Awaited<ReturnType<typeof fetch>>): Promise<T> {
+  const data: unknown = await response.json();
+  return data as T;
+}
+
+async function fetchJson<T>(url: string): Promise<T> {
+  return parseJson<T>(await fetch(url));
+}
 
 const STATE_FILE = '/hizzasama/resources/state.json';
 
@@ -449,13 +457,13 @@ client.on("messageCreate", async (message : any) => {
         } else if ((state.whitePlaying && message.author.id === state.player1) || (!state.whitePlaying && message.author.id === state.player2)) {
           if (chess.move(message.content)) {
             message.channel.send(state.whitePlaying ? `https://chessboardimage.com/${encodeURI(chess.fen())}-flip.png` : `https://chessboardimage.com/${encodeURI(chess.fen())}.png`);
-            if (chess.game_over()) {
-              if (chess.in_checkmate())
+            if (chess.isGameOver()) {
+              if (chess.isCheckmate())
                 if (state.whitePlaying)
                   message.react("🤍")
                 else
                   message.react("🖤")
-              else if (chess.in_draw() || chess.in_stalemate() || chess.in_threefold_repetition()) {
+              else if (chess.isDraw() || chess.isStalemate() || chess.isThreefoldRepetition()) {
                 message.react("🤍")
                 message.react("🖤")
               }
@@ -465,7 +473,7 @@ client.on("messageCreate", async (message : any) => {
               state.chessOngoing = false;
               break OUTER_LOOP
             }
-            if (chess.in_check())
+            if (chess.isCheck())
               message.react("🚩")
             state.whitePlaying = !state.whitePlaying;
             message.react("👌")
@@ -544,7 +552,7 @@ client.on('interactionCreate', async (interaction: Interaction) => {
   
   let oldLeaderboard : Account[] = [];
   if(interaction.commandName.startsWith("coin") || interaction.commandName.startsWith("guess") || interaction.commandName === "challenge"){
-    oldLeaderboard = await (await fetch(`http://localhost:8080/api/coin-commands/coin-leaderboard`)).json();
+    oldLeaderboard = await fetchJson<Account[]>(`http://localhost:8080/api/coin-commands/coin-leaderboard`);
   }
 
   const options = interaction.options.data
@@ -578,7 +586,7 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     case "guesscolour":    try { await rouletteColour(interaction); }  catch (err) { console.error(err) } break;
   }
   if(oldLeaderboard){    
-    let newLeaderboard : Account[] = await (await fetch(`http://localhost:8080/api/coin-commands/coin-leaderboard`)).json();
+    let newLeaderboard : Account[] = await fetchJson<Account[]>(`http://localhost:8080/api/coin-commands/coin-leaderboard`);
     const newIds = new Set(newLeaderboard.map(acc => acc.DiscordId));
     const oldIds = new Set(oldLeaderboard.map(acc => acc.DiscordId));
     const removedIds = [...oldIds].filter(id => !newIds.has(id));
@@ -600,7 +608,7 @@ client.on('interactionCreate', async (interaction: Interaction) => {
 
 export async function coinClaim(interaction: ChatInputCommandInteraction) {
   if(interaction){  
-    const response : CoinClaimResponse = await (await fetch(`http://localhost:8080/api/coin-commands/coin-claim?discordId=${interaction.user.id}`)).json();
+    const response = await fetchJson<CoinClaimResponse>(`http://localhost:8080/api/coin-commands/coin-claim?discordId=${interaction.user.id}`);
     
     let responseText = `<@${interaction.user.id}> CLAIMED \`${response["BaseClaim"].toLocaleString()}\` COIN!\n`
 
@@ -654,7 +662,7 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
 
 export async function coinBalance(interaction: ChatInputCommandInteraction) {
   if(interaction){
-    const response : CoinBalanceResponse = await (await fetch(`http://localhost:8080/api/coin-commands/coin-balance?discordId=${interaction.options!.get('person') ? interaction.options!.get('person')!.user!.id! : interaction.user.id}`)).json();
+    const response = await fetchJson<CoinBalanceResponse>(`http://localhost:8080/api/coin-commands/coin-balance?discordId=${interaction.options!.get('person') ? interaction.options!.get('person')!.user!.id! : interaction.user.id}`);
     let responseText = "";
     if(interaction.options!.get('person'))
       if(interaction.options!.get('person')!.user!.id! !== "0" || interaction.options!.get('person')!.user!.id! !== botId)
@@ -673,7 +681,7 @@ export async function coinBalance(interaction: ChatInputCommandInteraction) {
 
 export async function coinLeaderboard(interaction: ChatInputCommandInteraction) {
   if(interaction){  
-    const response : Account[] = await (await fetch(`http://localhost:8080/api/coin-commands/coin-leaderboard`)).json();
+    const response = await fetchJson<Account[]>(`http://localhost:8080/api/coin-commands/coin-leaderboard`);
     await interaction.deferReply();
     
     let leaderboardText = "**...................  LeaderBoard  ....................**\n";
@@ -701,7 +709,7 @@ async function updateMedal(discordId : string, place : number){
 
 export async function coinEconomy(interaction: ChatInputCommandInteraction) {
   if(interaction){  
-    const response : CoinEconomyResponse = await(await fetch(`http://localhost:8080/api/coin-commands/coin-economy?discordId=${interaction.user.id}`)).json();
+    const response = await fetchJson<CoinEconomyResponse>(`http://localhost:8080/api/coin-commands/coin-economy?discordId=${interaction.user.id}`);
     let responseText = ""; 
     if(response === null){
       responseText = "Use 'coin claim' to get some HizzaCoin and unlock more info"
@@ -732,8 +740,8 @@ export async function coinGive(interaction: ChatInputCommandInteraction | undefi
       return await interaction.reply({content: "You cannot send HizzaCoin to yourself!", ephemeral: true})
     if(amountToSend <= 0)
       return await interaction.reply({content: "You must send at least 1 HizzaCoin!", ephemeral: true})
-    const response = await (await fetch(`http://localhost:8080/api/coin-commands/coin-give?senderDiscordId=${senderDiscordId}&receiverDiscordId=${receiverDiscordId}&amountToSend=${amountToSend}`)).json();
-    if(response.status === 400 || !response)
+    const response = await fetchJson<{ status?: number } | null>(`http://localhost:8080/api/coin-commands/coin-give?senderDiscordId=${senderDiscordId}&receiverDiscordId=${receiverDiscordId}&amountToSend=${amountToSend}`);
+    if(!response || response.status === 400)
       return await interaction.reply({content: "You do not have enough HizzaCoin to perform this action! Try `coin claim` to get more", ephemeral: true})
     return await interaction.reply(`Sent \`${amountToSend.toLocaleString()}\` HizzaCoin to <@${receiverDiscordId}>!`)
   }
@@ -752,7 +760,7 @@ export async function coinLock(interaction: ChatInputCommandInteraction | undefi
       await interaction.reply({content: "You cannot lock this amount of coin. Do you have enough HizzaCoin?", ephemeral: true})
       return;
     }else{
-      initiateResponse = await initiateResponseRaw.json();
+      initiateResponse = await parseJson<Challenge>(initiateResponseRaw);
       await interaction.reply({content: `You have locked \`${amountToLock}\` HizzaCoin for 24 hours!`})
     }
   }
@@ -780,7 +788,7 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
       await interaction.reply({content: "You cannot create this challenge. Do you both have enough HizzaCoin?", ephemeral: true})
       return;
     }else{
-      initiateResponse = await initiateResponseRaw.json();
+      initiateResponse = await parseJson<Challenge>(initiateResponseRaw);
     }
   
     const emotes = ["🪨", "📰", "✂️", "🚫"]
@@ -828,7 +836,7 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
             await buttonInteraction.reply({content: "The challenge does not exist", ephemeral: true})
             return;
           }else{
-            const checkChallengeJson : Challenge = await checkChallenge.json();
+            const checkChallengeJson = await parseJson<Challenge>(checkChallenge);
             if(checkChallengeJson.State === ChallengeState.Expired){
               await buttonInteraction.reply({content: "This challenge has expired", ephemeral: true});
               return;
@@ -842,7 +850,7 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
 
           if(parseInt(buttonInteraction.customId.split(":")[0]) === 4){
             if(buttonInteraction.user.id === interaction.user.id || buttonInteraction.user.id === opponent!.user!.id){
-               const cancel : boolean = await (await (await fetch(`http://localhost:8080/api/coin-commands/cancel-challenge?challengeId=${initiateResponse.Id}`))).json();
+               const cancel = await fetchJson<boolean>(`http://localhost:8080/api/coin-commands/cancel-challenge?challengeId=${initiateResponse.Id}`);
                await buttonInteraction.reply(`<@${buttonInteraction.user.id}> has cancelled the challenge!`);
             }else{
                await buttonInteraction.reply({content: "You cannot cancel this challenge!", ephemeral: true})
@@ -855,7 +863,7 @@ export async function challenge(interaction: ChatInputCommandInteraction) {
 
           let challenge : Challenge;
           if(challengeRequest.status === 200){
-            challenge = await challengeRequest.json()
+            challenge = await parseJson<Challenge>(challengeRequest);
           }else{
             await buttonInteraction.reply({content: "You cannot respond to this challenge. Do you have enough HizzaCoin?", ephemeral: true})
             return;
@@ -1082,7 +1090,7 @@ export async function rouletteNumbers(interaction: ChatInputCommandInteraction) 
       return;
     }
     const allNumberInputsString = [...processedInput].toString();
-    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-number?discordId=${interaction.user.id}&numberBets=${allNumberInputsString}&bet=${interaction.options!.get('wager')!.value!}`)).json();
+    const response = await fetchJson<RouletteResponse>(`http://localhost:8080/api/coin-commands/roulette-number?discordId=${interaction.user.id}&numberBets=${allNumberInputsString}&bet=${interaction.options!.get('wager')!.value!}`);
     if(response.Payout > 0){
       await interaction.reply(`You managed to guess the number \`${response.RouletteNumber}\`! Your \`${response.Bet.toLocaleString()}\` bet turned to \`${response.Payout.toLocaleString()}\` HizzaCoin (\`x${reward}\`) 🪙🪙🪙!`)
     }else if(response.Bet > 0){
@@ -1095,7 +1103,7 @@ export async function rouletteNumbers(interaction: ChatInputCommandInteraction) 
 
 export async function rouletteColour(interaction: ChatInputCommandInteraction) {
   if(interaction){
-    const response : RouletteResponse = await (await fetch(`http://localhost:8080/api/coin-commands/roulette-colour?discordId=${interaction.user.id}&isColourRedBet=${interaction.options!.get('red')!.value!}&bet=${interaction.options!.get('wager')!.value!}`)).json();
+    const response = await fetchJson<RouletteResponse>(`http://localhost:8080/api/coin-commands/roulette-colour?discordId=${interaction.user.id}&isColourRedBet=${interaction.options!.get('red')!.value!}&bet=${interaction.options!.get('wager')!.value!}`);
     
     let colour = ''
     let redColours = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 13, 25, 27, 30, 32, 34, 36];

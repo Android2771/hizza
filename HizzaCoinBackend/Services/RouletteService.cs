@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace HizzaCoinBackend.Services;
 
-public class RouletteService
+public class RouletteService : IRouletteService
 {
     private readonly IMongoCollection<Roulette> _rouletteCollection;
 

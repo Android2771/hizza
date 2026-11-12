@@ -614,6 +614,12 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
         responseText += `\`+${response.Streak}\` Streak ${response.Streak < 30 ? 'PROTECTED' : ''}\n`;
       if(response.ClaimedReward.RewardedAmount > 0)
         responseText += `\`+${response.ClaimedReward.RewardedAmount.toLocaleString()}\` Reward for \`${response.ClaimedReward.Streak}\` Streak\n`;
+      if(response.Streak >= 365){
+        const rewardYears = Math.floor(response.Streak / 365);
+        const rewardBonusPercent = rewardYears * 20;
+        const rewardMultiplier = 1 + rewardYears * 0.2;
+        responseText += `YEAR REWARD BONUS: \`x${rewardMultiplier.toFixed(1)}\` (\`+${rewardBonusPercent}%\`)\n`;
+      }
       if(response.Multiplier > 1){
         responseText += `\`x${response.Multiplier}\` ${response.Streak > 0 && response.Streak % 365 === 0 ? 'GUARANTEED YEAR ANNIVERSARY ' : ''} **MULTIPLIER!** 🪙🪙\n`;
         state.noMultiplier[interaction.user!.id!] = 0;
@@ -644,7 +650,7 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
 
       if(response.Streak === 30)
         responseText += `\n**YOUR STREAK IS NOT PROTECTED ANYMORE, CLAIM EVERYDAY TO KEEP YOUR STREAK!**\n\n`
-      if(response.NextReward)
+      if(response.NextReward && response.NextReward.Streak > response.Streak)
         responseText += `Next Reward is in \`${response.NextReward.Streak - response.Streak}\` days!   (Streak Progress: \`${response.Streak}\`/\`${response.NextReward.Streak}\`)\n`;
     }
 

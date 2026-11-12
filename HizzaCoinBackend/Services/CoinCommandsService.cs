@@ -12,7 +12,7 @@ public class CoinCommandsService
     private readonly RewardsService _rewardsService;
     private readonly ChallengesService _challengesService;
     private readonly RouletteService _rouletteService;
-    private const int CoinClaimInflationIndex = 250;
+    private const int CoinClaimInflationIndex = 1000;
 
     public CoinCommandsService(AccountsService accountsService, TransactionsService transactionsService,
         RewardsService rewardsService, ChallengesService challengesService, RouletteService rouletteService)
@@ -50,7 +50,7 @@ public class CoinCommandsService
         }
 
         //Calculate total base claim with streak
-        var baseClaim = GetBaseClaim() * CoinClaimInflationIndex * 5;
+        var baseClaim = GetBaseClaim() * CoinClaimInflationIndex;
         var nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
         account.Streak = account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-1) || account.LastClaimDate == DateTime.UtcNow.Date.AddDays(-2) || account.Streak <= 30 || account.LastClaimDate == new DateTime(2026, 4, 21) ? account.Streak + 1 : 0;
         var totalClaim = baseClaim + account.Streak;
@@ -59,9 +59,12 @@ public class CoinCommandsService
         var claimedReward = new Reward();
         if (nextReward != null && nextReward.Streak == account.Streak)
         {
+            var years = account.Streak / 365;
+            var yearMultiplier = 1m + (years * 0.20m);
             claimedReward = nextReward;
             nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
-            claimedReward.RewardedAmount *= CoinClaimInflationIndex;
+            nextReward.Streak += years * 365;
+            claimedReward.RewardedAmount *= CoinClaimInflationIndex * yearMultiplier;
             totalClaim += claimedReward.RewardedAmount;
         }
 

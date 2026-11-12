@@ -21,7 +21,8 @@ public class RewardsService
 
     public async Task<Reward?> GetAsyncNextReward(long streak)
     {
-        var filter = Builders<Reward>.Filter.Gt(o => o.Streak, streak);
+        var adjustedStreak = streak % 366;
+        var filter = Builders<Reward>.Filter.Gt(o => o.Streak, adjustedStreak);
         var sort = Builders<Reward>.Sort.Ascending(o => o.Streak);
         return await _rewardsCollection.Find(filter).Sort(sort).Limit(1).FirstOrDefaultAsync();
     }

@@ -618,7 +618,7 @@ export async function coinClaim(interaction: ChatInputCommandInteraction) {
         const rewardYears = Math.floor(response.Streak / 365);
         const rewardBonusPercent = rewardYears * 20;
         const rewardMultiplier = 1 + rewardYears * 0.2;
-        responseText += `YEAR REWARD BONUS: \`x${rewardMultiplier.toFixed(1)}\` (\`+${rewardBonusPercent}%\` on milestone rewards)\n`;
+        responseText += `YEAR REWARD BONUS: \`x${rewardMultiplier.toFixed(1)}\` (\`+${rewardBonusPercent}%\`)\n`;
       }
       if(response.Multiplier > 1){
         responseText += `\`x${response.Multiplier}\` ${response.Streak > 0 && response.Streak % 365 === 0 ? 'GUARANTEED YEAR ANNIVERSARY ' : ''} **MULTIPLIER!** 🪙🪙\n`;

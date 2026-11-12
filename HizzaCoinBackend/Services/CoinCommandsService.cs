@@ -63,8 +63,6 @@ public class CoinCommandsService
             var yearMultiplier = 1m + (years * 0.20m);
             claimedReward = nextReward;
             nextReward = await _rewardsService.GetAsyncNextReward(account.Streak);
-            if (nextReward != null)
-                nextReward.Streak += years * 365L;
 
             claimedReward.RewardedAmount = (long)Math.Round(
                 claimedReward.RewardedAmount * CoinClaimInflationIndex * yearMultiplier

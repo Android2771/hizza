@@ -17,13 +17,16 @@ builder.Services.AddSingleton<IMongoDatabase>(serviceProvider =>
     return client.GetDatabase(settings.DatabaseName);
 });
 
-builder.Services.AddSingleton<AccountsService>();
-builder.Services.AddSingleton<ChallengesService>();
-builder.Services.AddSingleton<TransactionsService>();
-builder.Services.AddSingleton<RewardsService>();
-builder.Services.AddSingleton<RouletteService>();
-builder.Services.AddSingleton<StatisticsService>();
-builder.Services.AddSingleton<CoinCommandsService>();
+builder.Services.AddSingleton<IAccountsService, AccountsService>();
+builder.Services.AddSingleton<IChallengesService, ChallengesService>();
+builder.Services.AddSingleton<ITransactionsService, TransactionsService>();
+builder.Services.AddSingleton<IRewardsService, RewardsService>();
+builder.Services.AddSingleton<IRouletteService, RouletteService>();
+builder.Services.AddSingleton<IStatisticsService, StatisticsService>();
+builder.Services.AddSingleton<ICoinCommandsService, CoinCommandsService>();
+builder.Services.AddSingleton<ICoinRandomSource, CoinRandomSource>();
+builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
+builder.Services.AddSingleton<IDestinyProvider, DestinyProvider>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(
@@ -40,7 +43,7 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var challengesService = app.Services.GetRequiredService<ChallengesService>();
+    var challengesService = app.Services.GetRequiredService<IChallengesService>();
     await challengesService.CancelAllChallenges();
     var challenges = await challengesService.GetAsync();
 }
@@ -67,3 +70,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

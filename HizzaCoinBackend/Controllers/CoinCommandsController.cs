@@ -9,9 +9,9 @@ namespace HizzaCoinBackend.Controllers;
 [Route("api/coin-commands")]
 public class CoinCommandsController : ControllerBase
 {
-    private readonly CoinCommandsService _coinCommandsService;
+    private readonly ICoinCommandsService _coinCommandsService;
 
-    public CoinCommandsController(CoinCommandsService coinCommandsService)
+    public CoinCommandsController(ICoinCommandsService coinCommandsService)
     {
         _coinCommandsService = coinCommandsService;
     }

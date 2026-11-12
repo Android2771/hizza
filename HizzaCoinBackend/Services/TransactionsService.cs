@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace HizzaCoinBackend.Services;
 
-public class TransactionsService
+public class TransactionsService : ITransactionsService
 {
     private readonly IMongoCollection<Transaction> _transactionsCollection;
     

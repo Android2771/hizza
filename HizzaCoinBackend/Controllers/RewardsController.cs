@@ -8,9 +8,9 @@ namespace HizzaCoinBackend.Controllers;
 [Route("api/rewards")]
 public class RewardsController : ControllerBase
 {
-    private readonly RewardsService _rewardsService;
+    private readonly IRewardsService _rewardsService;
     
-    public RewardsController(RewardsService rewardsService) =>
+    public RewardsController(IRewardsService rewardsService) =>
         _rewardsService = rewardsService;
 
     [HttpGet]

@@ -2,13 +2,13 @@ using HizzaCoinBackend.Models.DTOs;
 
 namespace HizzaCoinBackend.Services;
 
-public class StatisticsService
+public class StatisticsService : IStatisticsService
 {
-    private readonly AccountsService _accountsService;
-    private readonly TransactionsService _transactionsService;
-    private readonly ChallengesService _challengesService;
+    private readonly IAccountsService _accountsService;
+    private readonly ITransactionsService _transactionsService;
+    private readonly IChallengesService _challengesService;
     
-    public StatisticsService(AccountsService accountsService, TransactionsService transactionsService, ChallengesService challengesService)
+    public StatisticsService(IAccountsService accountsService, ITransactionsService transactionsService, IChallengesService challengesService)
     {
         _accountsService = accountsService;
         _transactionsService = transactionsService;

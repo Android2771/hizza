@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace HizzaCoinBackend.Services;
 
-public class ChallengesService
+public class ChallengesService : IChallengesService
 {
     private readonly IMongoCollection<Challenge> _challengesCollection;
 

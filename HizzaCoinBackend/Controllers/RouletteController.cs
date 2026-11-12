@@ -8,9 +8,9 @@ namespace HizzaCoinBackend.Controllers;
 [Route("api/roulette")]
 public class RouletteController : ControllerBase
 {
-    private readonly RouletteService _rouletteService;
+    private readonly IRouletteService _rouletteService;
     
-    public RouletteController(RouletteService rouletteService) =>
+    public RouletteController(IRouletteService rouletteService) =>
         _rouletteService = rouletteService;
 
     [HttpGet]

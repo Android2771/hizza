@@ -127,7 +127,7 @@ async function saveState(): Promise<void> {
       'utf-8'
     );
 
-    console.log('State saved.');
+    // console.log('State saved.');
   } catch (error) {
     console.error('Failed to save state:', error);
   }
@@ -148,7 +148,6 @@ async function loadState(): Promise<void> {
     }else{
       chess = new Chess(savedState.chessFen);
     }
-
 
     console.log('State loaded.');
   } catch (error: any) {
